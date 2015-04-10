@@ -16,8 +16,10 @@ func init() {
 	mime.AddExtensionType(".svg", "image/svg+xml")
 
 	r := mux.NewRouter()
+
 	sr := r.PathPrefix("/api").Subrouter()
-	sr.HandleFunc("/posts", Posts)
+	sr.HandleFunc("/posts.json", Posts)
+
 	r.HandleFunc("/{rest:.*}", handler)
 	http.Handle("/", r)
 }

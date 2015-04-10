@@ -1,14 +1,14 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/core-ajax/core-ajax.html">
-<!--
-  `<post-service>` provides an API for a fake service --
+<link rel="import" href="../components/polymer/polymer.html">
+<link rel="import" href="../components/core-ajax/core-ajax.html">
+<!-- 
+  `<post-service>` provides an API for a fake service -- 
   _unquote_, the read-only social networking service!
 
   Provides a very simple API: `posts` returns the list of posts.
   `setFavorite` pretends to persist a user's favorite choice.
 
   @element post-service
-  @demo
+  @demo 
   @homepage http://www.polymer-project.org/docs/start/tutorial.html
 -->
 
@@ -30,20 +30,20 @@
       <td><code>avatar</code></td>
       <td>String</td>
       <td>URL for the user's avatar.</td>
-    </tr>
+    </tr>  
     <tr>
       <td><code>text</code></td>
       <td>String</td>
       <td>Post text.</td>
-    </tr>
+    </tr>  
     <tr>
       <td><code>favorite</code></td>
       <td>Boolean</td>
       <td>True if the current user favorited this post.</td>
     </tr>
   </table>
-
-  @attribute posts
+  
+  @attribute posts 
   @type Array
   @default []
 -->
@@ -56,7 +56,7 @@
     </style>
     <core-ajax id="ajax"
       auto
-      url="/api/posts"
+      url="../api/posts.json"
       on-core-response="{{postsLoaded}}"
       handleAs="json">
     </core-ajax>
@@ -70,12 +70,12 @@
       // Make a copy of the loaded data
       this.posts = this.$.ajax.response.slice(0);
     },
-    /**
+    /** 
      * Update the service with the current favorite value.
-     * (Two-way data binding updates the favorite value
+     * (Two-way data binding updates the favorite value 
      * stored locally.) If this was a real service, this
      * method would do something useful.
-     *
+     * 
      * @method setFavorite
      * @param uid {Number} Unique ID for post.
      * @param isFavorite {Boolean} True if the user marked this post as a favorite.
