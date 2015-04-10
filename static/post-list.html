@@ -1,5 +1,6 @@
 <link rel="import" href="../components/polymer/polymer.html">
 <link rel="import" href="../post-service/post-service.html">
+<link rel="import" href="/components/paper-button/paper-button.html">
 <link rel="import" href="post-card.html">
 
 <polymer-element name="post-list" attributes="show">
@@ -15,6 +16,11 @@
     </style>
 
     <post-service id="service" posts="{{posts}}"></post-service>
+
+    <paper-button raised on-click="{{ addPost }}">
+      <core-icon icon="check"></core-icon>
+      button
+    </paper-button>
     
     <div layout vertical center>
       <template repeat="{{post in posts}}">
@@ -35,6 +41,14 @@
     handleFavorite: function(event, detail, sender) {
       var post = sender.templateInstance.model.post;
       this.$.service.setFavorite(post.uid, post.favorite);
+    },
+    addPost: function(event, detail, sender){
+      var post = _.clone(this.$.service.posts[0])
+      post.username =  'kiryaka'
+      post.uid = 0
+      post.text = 'EAT IT!'
+      post.avatar = "images/avatar-04.svg"
+      this.$.service.posts.unshift(post)
     }
   });
   </script>
