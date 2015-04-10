@@ -8,6 +8,7 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"strings"
 )
 
 func init() {
@@ -17,11 +18,20 @@ func init() {
 
 	r := mux.NewRouter()
 
+	polymer := r.PathPrefix("/components").Subrouter()
+	polymer.HandleFunc("/{rest:.*}", polymerComponents)
+
 	sr := r.PathPrefix("/api").Subrouter()
 	sr.HandleFunc("/posts.json", Posts)
 
 	r.HandleFunc("/{rest:.*}", handler)
 	http.Handle("/", r)
+}
+
+func polymerComponents(w http.ResponseWriter, r *http.Request) {
+	log.Println("path:", r.URL.Path)
+
+	http.ServeFile(w, r, "bower_"+strings.TrimPrefix(r.URL.Path, "/"))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
