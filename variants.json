@@ -1,0 +1,110 @@
+[
+  {
+    "uid": 1,
+    "text": "Public/Private Pay Parity",
+    "endpoints": [
+      {
+        "text": "Public and private pay packages become comparable",
+        "prob": 0.35,
+        "impact": 3
+      },
+      {
+        "text": "Public pay and benefits continue to greatly exceed those of private sector",
+        "prob": 0.65,
+        "impact": -3
+      }
+    ],
+    "visible": true,
+    "new": false
+  },
+  {
+    "uid": 2,
+    "text": "Nationals with appropriate skills and education",
+    "endpoints": [
+      {
+        "text": "Sufficient nationals with appropriate skills and education",
+        "prob": "0.3",
+        "impact": "2"
+      },
+      {
+        "text": "Insufficient nationals with appropriate skills and education",
+        "prob": "0.7",
+        "impact": "-4"
+      }
+    ],
+    "visible": true,
+    "new": false
+  },
+  {
+    "uid": 3,
+    "text": "Nationals' perception of social status in private sector jobs",
+    "endpoints": [
+      {
+        "text": "Nationals' perception of equivalent social status in public-private sector jobs",
+        "prob": 0.35,
+        "impact": 3
+      },
+      {
+        "text": "Nationals' perception of low social status in private sector jobs",
+        "prob": 0.65,
+        "impact": "-4"
+      }
+    ],
+    "visible": true,
+    "new": false
+  },
+  {
+    "uid": 4,
+    "text": "Government political will to remain employer of first resort",
+    "endpoints": [
+      {
+        "text": "Government makes efforts to scale back public sector employment",
+        "prob": "0.25",
+        "impact": "4"
+      },
+      {
+        "text": "Government maintains current scale of public sector employment",
+        "prob": "0.75",
+        "impact": "-4"
+      }
+    ],
+    "visible": true,
+    "new": false
+  },
+  {
+    "uid": 5,
+    "text": "Availability and cost of specialized skilled expatriate labor",
+    "endpoints": [
+      {
+        "text": "Specialized skilled expatriate labor not readily available and/or too costly",
+        "prob": "0.2",
+        "impact": "2"
+      },
+      {
+        "text": "Specialized skilled expatriate labor readily available and at reasonable cost",
+        "prob": "0.8",
+        "impact": -3
+      }
+    ],
+    "visible": true,
+    "new": false
+  },
+  {
+    "uid": 6,
+    "text": "Fertility rates impact on job market",
+    "endpoints": [
+      {
+        "text": "Job seeking population continues to expand",
+        "prob": "0.85",
+        "impact": 3
+      },
+      {
+        "text": "Job seeking population stablizes or contracts",
+        "prob": "0.15",
+        "impact": "-4"
+      }
+    ],
+    "visible": true,
+    "new": false
+  }
+]

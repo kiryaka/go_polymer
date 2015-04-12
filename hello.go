@@ -23,14 +23,30 @@ func init() {
 
 	sr := r.PathPrefix("/api").Subrouter()
 	sr.HandleFunc("/posts.json", Posts)
+	sr.HandleFunc("/saveVariants", saveVariants)
+	sr.HandleFunc("/variants.json", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("variants path:", r.URL.Path)
+		http.ServeFile(w, r, "variants.json")
+	})
 
 	r.HandleFunc("/{rest:.*}", handler)
 	http.Handle("/", r)
 }
 
+func saveVariants(w http.ResponseWriter, r *http.Request) {
+	log.Println("broser ask to save new set of variants. Reading")
+	defer r.Body.Close()
+	contents, err := ioutil.ReadAll(r.Body)
+	err = ioutil.WriteFile("variants.json", contents, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s\n", string(contents))
+	return
+}
+
 func polymerComponents(w http.ResponseWriter, r *http.Request) {
 	log.Println("path:", r.URL.Path)
-
 	http.ServeFile(w, r, "bower_"+strings.TrimPrefix(r.URL.Path, "/"))
 }
 

@@ -1,0 +1,107 @@
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/components/core-icon-button/core-icon-button.html">
+<link href="/components/core-field/core-field.html" rel="import">
+
+<polymer-element name="variant-row" attributes="variant">
+  <template>
+    <style>
+      :host {
+        display: block;
+        background-color: white;
+        width: 100%;
+        font-size: 0.6rem;
+        font-weight: 300;
+      }
+
+      core-icon-button {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        color: #636363;
+      }
+
+      :host([favorite]) core-icon-button {
+        color: #da4336;
+      }
+
+      .endpoints .num {
+        width: 40px;
+      }
+
+      core-field /deep/ ::content  input{
+        font-size: 0.8rem;
+      }
+
+      core-field {
+        border: 1px solid #ddd;
+        margin: 2px;
+        height: 20px;
+      }
+
+      .variant_header{
+        height: 52px;
+      }
+
+      .variantInput{
+        height: 46px;
+      }
+
+      .rowNum{
+        height: 46px;
+        line-height: 46px;
+        border: 1px solid #ddd;
+        margin: 2px;
+        padding: 0 10px 0 10px;
+        vertical-align: middle;
+        font-size: 1.4rem;
+      }
+
+      input{
+        width: 100%;
+      }
+
+
+    </style>
+
+    <div class="variant_header" layout horizontal center>
+
+      <div class="rowNum" layout center> {{variant.uid}} </div>
+      <core-field flex two class="variantInput">
+        <input is="core-input" placeholder="variant description" value="{{variant.text}}">
+      </core-field>
+      <div vertical layout class="endpoints" flex three>
+        <template repeat="{{endpoint in variant.endpoints}}">
+          <div layout horizontal center>
+            <core-field flex class="endpoint">
+              <input is="core-input" placeholder="variant endpoint" value="{{endpoint.text}}">
+            </core-field>
+            <core-field label="probablility" class="num">
+              <input is="core-input" value="{{endpoint.prob}}">
+            </core-field>
+            <core-field label="impact" class="num">
+              <input is="core-input" value="{{endpoint.impact}}">
+            </core-field>
+          </div>
+        </template>
+      </div>
+
+    </div>
+  </template>
+  <script>
+    Polymer({
+      publish: {
+        favorite: {
+          value: false,
+          reflect: true
+        }
+      },
+      favoriteTapped: function(event, detail, sender) {
+        this.favorite = !this.favorite;
+        this.fire('favorite-tap');
+      },
+      ready: function() {
+
+      }
+    });
+  </script>
+</polymer-element>

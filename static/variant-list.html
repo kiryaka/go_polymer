@@ -1,0 +1,49 @@
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/service/variant-service.html">
+<link rel="import" href="/components/core-signals/core-signals.html">
+<link rel="import" href="variant-row.html">
+<link rel="import" href="row-chart.html">
+
+<polymer-element name="variant-list" attributes="show">
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 90%;
+      }
+
+    </style>
+
+    <variant-service id="service" variants="{{variants}}"></variant-service>
+
+    <div layout vertical center>
+      <template repeat="{{variant in variants}}">
+        <variant-row variant="{{variant}}"/>
+      </template>
+    </div>
+
+    <core-xhr id="xhr" method="POST"></core-xhr>
+    <core-signals on-core-signal-foo="{{fooSignal}}"></core-signals>
+
+    <row-chart variants="{{variants}}"></row-chart>
+
+  </template>
+
+  <script>
+    Polymer({
+      handleFavorite: function(event, detail, sender) {
+        var post = sender.templateInstance.model.post;
+        this.$.service.setFavorite(post.uid, post.favorite);
+      },
+      saveVariant: function(event, detail, sender){
+        this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.$.service.variants, null, 2), method:"post"});
+      },
+      fooSignal: function(e, detail, sender) {
+        this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.$.service.variants, null, 2), method:"post"});
+      },
+      ready: function() {
+
+      }
+    });
+  </script>
+</polymer-element>
