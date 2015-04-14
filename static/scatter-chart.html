@@ -11,6 +11,10 @@
                 width: 100%;
             }
 
+            .selected{
+                fill: blue;
+            }
+
             .axis path,
             .axis line {
                 fill: none;
@@ -142,8 +146,8 @@
                 var cBad = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact < 0 ? d.impact : 0}))).range([0,1]);
                 var cGood = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact > 0 ? d.impact : 0}))).range([0,1]);
 
-                var div = d3.select(this.$.toolDiv);
                 var fireFn = this.asyncFire.bind(this)
+                var currentDot
                 svg.selectAll(".dot")
                         .data(data)
                         .enter().append("circle")
@@ -155,14 +159,20 @@
                             return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
                         })
                         .on("mouseover", function(d) {
-                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
 
                         })
                         .on("mouseout", function(d) {
 
                         })
                         .on('click', function(geography) {
-
+                            if (typeof currentDot !== "undefined") {
+                                currentDot.style("fill", function(d) {
+                                    return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
+                                })
+                            }
+                            currentDot = d3.select(d3.event.currentTarget)
+                            currentDot.style("fill", "#0000ff");
+                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
                         });
 
             },

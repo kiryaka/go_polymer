@@ -21,12 +21,13 @@
         fill: orange;
       }
 
-      .bar:hover {
-        fill: orangered ;
-      }
+      /*.bar:hover {*/
+        /*fill: orangered ;*/
+      /*}*/
 
     </style>
     <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
+    <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
     <div class="container" layout horizontal center>
       <svg id="chart"></svg>
     </div>
@@ -112,14 +113,41 @@
                 .attr("class", "y axis")
                 .call(yAxis);
 
+
+        badColors = ["#FF0000", "#FF1000", "#FF2000", "#FF3000", "#FF4000", "#FF5000", "#FF6000", "#FF7000", "#FF8000", "#FF9000", "#FFA000", "#FFB000", "#FFC000", "#FFD000", "#FFE000", "#FFF000", "#FFFF00"]
+        goodColors = ["#FFFF00", "#F0FF00", "#E0FF00", "#D0FF00", "#C0FF00", "#B0FF00", "#A0FF00", "#90FF00", "#80FF00", "#70FF00", "#60FF00", "#50FF00", "#40FF00", "#30FF00", "#20FF00", "#10FF00", "#00FF00"]
+
+        heatmapBadColour = d3.scale.linear()
+                .domain(d3.range(0, 1, 1.0 / (badColors.length - 1)))
+                .range(badColors);
+
+        heatmapGoodColour = d3.scale.linear()
+                .domain(d3.range(0, 1, 1.0 / (goodColors.length - 1)))
+                .range(goodColors);
+
+
+        cBad = d3.scale.linear().domain(d3.extent(this.dataSet.map(function(d){return d.impact < 0 ? d.impact : 0}))).range([0,1]);
+        cGood = d3.scale.linear().domain(d3.extent(this.dataSet.map(function(d){return d.impact > 0 ? d.impact : 0}))).range([0,1]);
+
+        var fireFn = this.asyncFire.bind(this)
+
         svg.selectAll(".bar")
                 .data(this.dataSet)
                 .enter().append("rect")
+                .attr("id", function(d){
+                  return "name_" + d.endpoints.join("");
+                })
                 .attr("class", "bar")
                 .attr("x", function(d) { return x(d.id); })
                 .attr("width", x.rangeBand())
                 .attr("y", function(d) { return y(d.prob); })
-                .attr("height", function(d) { return height - y(d.prob); });
+                .attr("height", function(d) { return height - y(d.prob); })
+                .style("fill", function(d) {
+                  return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
+                })
+                .on('click', function(geography) {
+                  fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
+                });
 
 
         function type(d) {
@@ -127,9 +155,21 @@
           return d;
         }
       },
+      switchSelected: function(el){
+        if (typeof this.currentBar !== "undefined") {
+          this.currentBar.style("fill", function(d) {
+            return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
+          })
+        }
+        this.currentBar = el
+        this.currentBar.style("fill", "#0000ff");
+      },
       variantsChanged: function(oldVal, newVal) {
         if (newVal.length == 0) return;
         this.redraw()
+      },
+      showsc: function(e, detail, sender) {
+        this.switchSelected(d3.select(this.$.chart).selectAll("rect#name_" + detail.join("")))
       }
     });
   </script>
