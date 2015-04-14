@@ -23,12 +23,12 @@
     "endpoints": [
       {
         "text": "Sufficient nationals with appropriate skills and education",
-        "prob": "0.3",
+        "prob": "0.7",
         "impact": "2"
       },
       {
         "text": "Insufficient nationals with appropriate skills and education",
-        "prob": "0.7",
+        "prob": "0.3",
         "impact": "-4"
       }
     ],
@@ -41,12 +41,12 @@
     "endpoints": [
       {
         "text": "Nationals' perception of equivalent social status in public-private sector jobs",
-        "prob": 0.35,
+        "prob": "0.65",
         "impact": 3
       },
       {
         "text": "Nationals' perception of low social status in private sector jobs",
-        "prob": 0.65,
+        "prob": "0.35",
         "impact": "-4"
       }
     ],

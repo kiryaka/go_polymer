@@ -38,6 +38,10 @@
         height: 20px;
       }
 
+      core-field.showsc{
+        border: 1px solid red;
+      }
+
       .variant_header{
         height: 52px;
       }
@@ -72,7 +76,7 @@
       <div vertical layout class="endpoints" flex three>
         <template repeat="{{endpoint in variant.endpoints}}" id="eps">
           <div layout horizontal center>
-            <core-field flex class="endpoint">
+            <core-field flex class="endpoint {{endpoint.selectedClass}}">
               <input is="core-input" placeholder="variant endpoint" value="{{endpoint.text}}">
             </core-field>
             <core-field label="probablility" class="num">
@@ -86,6 +90,8 @@
       </div>
 
     </div>
+
+    <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
   </template>
   <script>
     Polymer({
@@ -93,6 +99,11 @@
         this.asyncFire('core-signal', {name: "numchanged", data: "Foo!"});
       },
       ready: function() {
+      },
+      showsc: function(e, detail, sender) {
+        this.variant.uid
+        this.variant.endpoints[detail[this.variant.uid-1]].selectedClass = "showsc";
+        this.variant.endpoints[1-detail[this.variant.uid-1]].selectedClass = "";
       }
     });
   </script>

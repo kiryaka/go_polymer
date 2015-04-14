@@ -10,6 +10,7 @@
                 background-color: white;
                 width: 100%;
             }
+
             .axis path,
             .axis line {
                 fill: none;
@@ -17,13 +18,25 @@
                 shape-rendering: crispEdges;
             }
 
-            .dot {
-                stroke: #000;
+            div.tooltip {
+                position: absolute;
+                text-align: center;
+                width: 60px;
+                height: 28px;
+                padding: 2px;
+                font: 12px sans-serif;
+                background: lightsteelblue;
+                border: 0px;
+                border-radius: 8px;
+                pointer-events: none;
+                opacity: 0;
             }
 
         </style>
         <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
-        <div class="container" layout horizontal center>
+
+        <div id="toolDiv" class="tooltip"></div>
+        <div class="container" center>
             <svg id="scatterChart"></svg>
         </div>
     </template>
@@ -43,7 +56,6 @@
                 this.redraw()
             },
             ready: function(){
-
             },
             rebuildDataSet: function(){
                 this.scenNumber = Math.pow(2, this.variants.length)
@@ -63,8 +75,8 @@
             redraw: function(){
                 this.rebuildDataSet();
                 var margin = {top: 20, right: 20, bottom: 30, left: 40},
-                        width = 960 - margin.left - margin.right,
-                        height = 500 - margin.top - margin.bottom;
+                        width = 600 - margin.left - margin.right,
+                        height = 300 - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
                         .range([0, width]);
@@ -78,11 +90,20 @@
                         .scale(x)
                         .orient("bottom");
 
+                var formatPercent = d3.format(".0%");
                 var yAxis = d3.svg.axis()
                         .scale(y)
-                        .orient("left");
+                        .orient("left")
+                        .tickFormat(formatPercent);
 
-                var svg = d3.select("body").append("svg")
+                var yAxisNoText = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+                        .tickFormat("");
+
+
+
+                var svg = d3.select(this.$.scatterChart)
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
@@ -96,73 +117,88 @@
 //                        d.sepalWidth = +d.sepalWidth;
 //                    });
 
-                    x.domain(d3.extent(data, function(d) { return d.impact; })).nice();
-                    y.domain(d3.extent(data, function(d) { return d.prob; })).nice();
+                x.domain(d3.extent(data, function(d) { return d.impact; })).nice();
+                y.domain(d3.extent(data, function(d) { return d.prob; })).nice();
 
-                    svg.append("g")
-                            .attr("class", "x axis")
-                            .attr("transform", "translate(0," + height + ")")
-                            .call(xAxis)
-                            .append("text")
-                            .attr("class", "label")
-                            .attr("x", width)
-                            .attr("y", -6)
-                            .style("text-anchor", "end")
-                            .text("Sepal Width (cm)");
+                svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis)
+                        .append("text")
+                        .attr("class", "label")
+                        .attr("x", width)
+                        .attr("y", -6)
+                        .style("text-anchor", "end")
+                        .text("impact");
 
-                    svg.append("g")
-                            .attr("class", "y axis")
-                            .call(yAxis)
-                            .append("text")
-                            .attr("class", "label")
-                            .attr("transform", "rotate(-90)")
-                            .attr("y", 6)
-                            .attr("dy", ".71em")
-                            .style("text-anchor", "end")
-                            .text("Sepal Length (cm)")
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis)
+                        .append("text")
+                        .attr("class", "label")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 6)
+                        .attr("dy", ".71em")
+                        .style("text-anchor", "end")
+                        .text("probability")
 
-                var colours = ["#6363FF", "#6373FF", "#63A3FF", "#63E3FF", "#63FFFB", "#63FFCB",
-                    "#63FF9B", "#63FF6B", "#7BFF63", "#BBFF63", "#DBFF63", "#FBFF63",
-                    "#FFD363", "#FFB363", "#FF8363", "#FF7363", "#FF6364"];
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .attr("transform", "translate(" + x(0) + ",0)")
+                        .call(yAxisNoText)
 
-                var heatmapColour = d3.scale.linear()
-                        .domain(d3.range(0, 1, 1.0 / (colours.length - 1)))
-                        .range(colours);
+                var badColors = ["#FF0000", "#FF1000", "#FF2000", "#FF3000", "#FF4000", "#FF5000", "#FF6000", "#FF7000", "#FF8000", "#FF9000", "#FFA000", "#FFB000", "#FFC000", "#FFD000", "#FFE000", "#FFF000", "#FFFF00"]
+                var goodColors = ["#FFFF00", "#F0FF00", "#E0FF00", "#D0FF00", "#C0FF00", "#B0FF00", "#A0FF00", "#90FF00", "#80FF00", "#70FF00", "#60FF00", "#50FF00", "#40FF00", "#30FF00", "#20FF00", "#10FF00", "#00FF00"]
+
+                var heatmapBadColour = d3.scale.linear()
+                        .domain(d3.range(0, 1, 1.0 / (badColors.length - 1)))
+                        .range(badColors);
+
+                var heatmapGoodColour = d3.scale.linear()
+                        .domain(d3.range(0, 1, 1.0 / (goodColors.length - 1)))
+                        .range(goodColors);
 
 
-                var c = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact}))).range([0,1]);
+                var cBad = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact < 0 ? d.impact : 0}))).range([0,1]);
+                var cGood = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact > 0 ? d.impact : 0}))).range([0,1]);
 
-                    svg.selectAll(".dot")
-                            .data(data)
-                            .enter().append("circle")
-                            .attr("class", "dot")
-                            .attr("r", 3.5)
-                            .attr("cx", function(d) { return x(d.impact); })
-                            .attr("cy", function(d) { return y(d.prob); })
-                            .style("fill", function(d) {
-                                return color(d.impact);
-                            });
+                var tip = d3.tip()
+                        .attr('class', 'd3-tip')
+                        .offset([-10, 0])
+                        .html(function(d) {
+                            return "<strong>Probablility:</strong> <span style='color:red'>" + (100*d.prob) + "</span>";
+                        })
 
-                    var legend = svg.selectAll(".legend")
-                            .data(color.domain())
-                            .enter().append("g")
-                            .attr("class", "legend")
-                            .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+                var div = d3.select(this.$.toolDiv);
+                var fireFn = this.asyncFire.bind(this)
+                svg.selectAll(".dot")
+                        .data(data)
+                        .enter().append("circle")
+                        .attr("class", "dot")
+                        .attr("r", 3.5)
+                        .attr("cx", function(d) { return x(d.impact); })
+                        .attr("cy", function(d) { return y(d.prob); })
+                        .style("fill", function(d) {
+                            return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
+                        })
+                        .on("mouseover", function(d) {
+                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
+                            div.transition()
+                                    .duration(200)
+                                    .style("opacity", .9);
+                            div .html("details")
+                                    .style("left", (d3.event.offsetX) + "px")
+                                    .style("top", (d3.event.offsetY - 28) + "px");
+                        })
+                        .on("mouseout", function(d) {
+                            div.transition()
+                                    .duration(500)
+                                    .style("opacity", 0);
+                        })
+                        .on('click', function(geography) {
+                            alert('asfd');
+                        });
 
-                    legend.append("rect")
-                            .attr("x", width - 18)
-                            .attr("width", 18)
-                            .attr("height", 18)
-                            .style("fill", color);
-
-                    legend.append("text")
-                            .attr("x", width - 24)
-                            .attr("y", 9)
-                            .attr("dy", ".35em")
-                            .style("text-anchor", "end")
-                            .text(function(d) { return d; });
-
-//                });
             },
             variantsChanged: function(oldVal, newVal) {
                 if (newVal.length == 0) return;

@@ -25,10 +25,6 @@
         fill: orangered ;
       }
 
-      .x.axis path {
-        display: none;
-      }
-
       .d3-tip {
         line-height: 1;
         font-weight: bold;
@@ -101,8 +97,8 @@
         this.rebuildDataSet();
 
         var margin = {top: 40, right: 20, bottom: 30, left: 40},
-                width = 1200 - margin.left - margin.right,
-                height = 200 - margin.top - margin.bottom;
+                width = 800 - margin.left - margin.right,
+                height = 300 - margin.top - margin.bottom;
 
         var formatPercent = d3.format(".0%");
 
@@ -114,7 +110,8 @@
 
         var xAxis = d3.svg.axis()
                 .scale(x)
-                .orient("bottom");
+                .orient("bottom")
+                .tickFormat("");
 
         var yAxis = d3.svg.axis()
                 .scale(y)
@@ -151,13 +148,7 @@
 
         svg.append("g")
                 .attr("class", "y axis")
-                .call(yAxis)
-                .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
-                .style("text-anchor", "end")
-                .text("probability");
+                .call(yAxis);
 
         svg.selectAll(".bar")
                 .data(this.dataSet)

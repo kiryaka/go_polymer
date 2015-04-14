@@ -26,8 +26,10 @@
     <core-xhr id="xhr" method="POST"></core-xhr>
     <core-signals on-core-signal-foo="{{fooSignal}}"></core-signals>
 
-    <row-chart variants="{{variants}}"></row-chart>
-    <scatter-chart variants="{{variants}}"></scatter-chart>
+    <div layout horizontal>
+      <row-chart variants="{{variants}}" flex></row-chart>
+      <scatter-chart variants="{{variants}}"  flex></scatter-chart>
+    </div>
 
   </template>
 
