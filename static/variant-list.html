@@ -3,9 +3,10 @@
 <link rel="import" href="/components/core-signals/core-signals.html">
 <link rel="import" href="variant-row.html">
 <link rel="import" href="row-chart.html">
+<link rel="import" href="scatter-chart.html">
 
 <polymer-element name="variant-list" attributes="show">
-  <template>
+  <template variants="{{variants}}">
     <style>
       :host {
         display: block;
@@ -26,23 +27,24 @@
     <core-signals on-core-signal-foo="{{fooSignal}}"></core-signals>
 
     <row-chart variants="{{variants}}"></row-chart>
+    <scatter-chart variants="{{variants}}"></scatter-chart>
 
   </template>
 
   <script>
     Polymer({
-      handleFavorite: function(event, detail, sender) {
-        var post = sender.templateInstance.model.post;
-        this.$.service.setFavorite(post.uid, post.favorite);
-      },
-      saveVariant: function(event, detail, sender){
-        this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.$.service.variants, null, 2), method:"post"});
+      created: function() {
+        // hint that items is an array
+        this.variants = [];
       },
       fooSignal: function(e, detail, sender) {
-        this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.$.service.variants, null, 2), method:"post"});
+        this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.variants, null, 2), method:"post"});
       },
       ready: function() {
 
+      },
+      variantsChanged: function(oldVal, newVal) {
+        if (newVal.length == 0) return;
       }
     });
   </script>

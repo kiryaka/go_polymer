@@ -59,17 +59,50 @@
       }
 
     </style>
-
+    <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
     <div class="container" layout horizontal center>
       <svg id="chart"></svg>
     </div>
   </template>
   <script>
     Polymer({
-      ready: function() {
+      created: function() {
+        // hint that items is an array
+        this.scenNumber = 0;
+        this.variants = [];
+        this.dataSet = [];
+      },
+      costFunction: function(prob, impact){
+        return prob;
+      },
+      numchanged: function(e, detail, sender) {
+        d3.select(this.$.chart).selectAll("*").remove();
+        this.redraw()
+      },
+      ready: function(){
+
+      },
+      rebuildDataSet: function(){
+        this.scenNumber = Math.pow(2, this.variants.length)
+        this.dataSet.length = this.scenNumber
+        for (var scenario = 0; scenario < this.scenNumber; scenario++){
+          var obj = {id: scenario, prob: 1, impact: 0, weight: 0, endpoints: []}
+          for (var factor = 0; factor < this.variants.length; factor++){
+            var ep = (scenario & (1 << factor ) ) > 0 ? 1 : 0
+            obj.endpoints.push(ep)
+            obj.impact -= -this.variants[factor].endpoints[ep].impact;
+            obj.prob *= this.variants[factor].endpoints[ep].prob;
+          }
+          obj.weight = this.costFunction(obj.weight, obj.prob);
+          this.dataSet[scenario] = obj;
+        }
+      },
+      redraw: function(){
+        this.rebuildDataSet();
+
         var margin = {top: 40, right: 20, bottom: 30, left: 40},
-                width = 960 - margin.left - margin.right,
-                height = 500 - margin.top - margin.bottom;
+                width = 1200 - margin.left - margin.right,
+                height = 200 - margin.top - margin.bottom;
 
         var formatPercent = d3.format(".0%");
 
@@ -92,7 +125,7 @@
                 .attr('class', 'd3-tip')
                 .offset([-10, 0])
                 .html(function(d) {
-                  return "<strong>Frequency:</strong> <span style='color:red'>" + d.frequency + "</span>";
+                  return "<strong>Probablility:</strong> <span style='color:red'>" + (100*d.prob) + "</span>";
                 })
 
         var svg = d3.select(this.$.chart)
@@ -103,42 +136,49 @@
 
         svg.call(tip);
 
-        d3.tsv("/data.tsv", type, function(error, data) {
-          x.domain(data.map(function(d) { return d.letter; }));
-          y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+        this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
 
-          svg.append("g")
-                  .attr("class", "x axis")
-                  .attr("transform", "translate(0," + height + ")")
-                  .call(xAxis);
+        var uids = this.dataSet.map(function(obj){    return obj.id;})
+        var probs = d3.max(this.dataSet, function(obj){    return obj.prob;})
 
-          svg.append("g")
-                  .attr("class", "y axis")
-                  .call(yAxis)
-                  .append("text")
-                  .attr("transform", "rotate(-90)")
-                  .attr("y", 6)
-                  .attr("dy", ".71em")
-                  .style("text-anchor", "end")
-                  .text("Frequency");
+        x.domain(uids);
+        y.domain([0, probs]);
 
-          svg.selectAll(".bar")
-                  .data(data)
-                  .enter().append("rect")
-                  .attr("class", "bar")
-                  .attr("x", function(d) { return x(d.letter); })
-                  .attr("width", x.rangeBand())
-                  .attr("y", function(d) { return y(d.frequency); })
-                  .attr("height", function(d) { return height - y(d.frequency); })
-                  .on('mouseover', tip.show)
-                  .on('mouseout', tip.hide)
+        svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
 
-        });
+        svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("probability");
+
+        svg.selectAll(".bar")
+                .data(this.dataSet)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) { return x(d.id); })
+                .attr("width", x.rangeBand())
+                .attr("y", function(d) { return y(d.prob); })
+                .attr("height", function(d) { return height - y(d.prob); })
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide);
+
 
         function type(d) {
           d.frequency = +d.frequency;
           return d;
         }
+      },
+      variantsChanged: function(oldVal, newVal) {
+        if (newVal.length == 0) return;
+        this.redraw()
       }
     });
   </script>

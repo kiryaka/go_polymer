@@ -70,16 +70,16 @@
         <input is="core-input" placeholder="variant description" value="{{variant.text}}">
       </core-field>
       <div vertical layout class="endpoints" flex three>
-        <template repeat="{{endpoint in variant.endpoints}}">
+        <template repeat="{{endpoint in variant.endpoints}}" id="eps">
           <div layout horizontal center>
             <core-field flex class="endpoint">
               <input is="core-input" placeholder="variant endpoint" value="{{endpoint.text}}">
             </core-field>
             <core-field label="probablility" class="num">
-              <input is="core-input" value="{{endpoint.prob}}">
+              <input is="core-input" value="{{endpoint.prob}}" on-change="{{numChanged}}">
             </core-field>
             <core-field label="impact" class="num">
-              <input is="core-input" value="{{endpoint.impact}}">
+              <input is="core-input" value="{{endpoint.impact}}" on-change="{{numChanged}}">
             </core-field>
           </div>
         </template>
@@ -89,18 +89,10 @@
   </template>
   <script>
     Polymer({
-      publish: {
-        favorite: {
-          value: false,
-          reflect: true
-        }
-      },
-      favoriteTapped: function(event, detail, sender) {
-        this.favorite = !this.favorite;
-        this.fire('favorite-tap');
+      numChanged: function() {
+        this.asyncFire('core-signal', {name: "numchanged", data: "Foo!"});
       },
       ready: function() {
-
       }
     });
   </script>
