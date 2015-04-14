@@ -28,6 +28,10 @@
         width: 40px;
       }
 
+      core-field.ep_1{
+        background-color: #eee;
+      }
+
       core-field /deep/ ::content  input{
         font-size: 0.8rem;
       }
@@ -74,13 +78,18 @@
         <input is="core-input" placeholder="variant description" value="{{variant.text}}">
       </core-field>
       <div vertical layout class="endpoints" flex three>
-        <template repeat="{{endpoint in variant.endpoints}}" id="eps">
+        <template repeat="{{endpoint, index in variant.endpoints}}" id="eps">
           <div layout horizontal center>
             <core-field flex class="endpoint {{endpoint.selectedClass}}">
               <input is="core-input" placeholder="variant endpoint" value="{{endpoint.text}}">
             </core-field>
-            <core-field label="probablility" class="num">
-              <input is="core-input" value="{{endpoint.prob}}" on-change="{{numChanged}}">
+            <core-field label="probablility" class="num ep_{{index}}">
+              <template if="{{index == 0}}">
+                <input is="core-input" value="{{endpoint.prob}}" on-change="{{numChanged}}" >
+              </template>
+              <template if="{{index == 1}}">
+                <input is="core-input" value="{{endpoint.prob}}" disabled >
+              </template>
             </core-field>
             <core-field label="impact" class="num">
               <input is="core-input" value="{{endpoint.impact}}" on-change="{{numChanged}}">
@@ -95,7 +104,8 @@
   </template>
   <script>
     Polymer({
-      numChanged: function() {
+      numChanged: function(e) {
+        this.variant.endpoints[1].prob = d3.round(1 - this.variant.endpoints[0].prob, 2)
         this.asyncFire('core-signal', {name: "numchanged", data: "Foo!"});
       },
       ready: function() {

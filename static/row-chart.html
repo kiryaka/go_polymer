@@ -23,7 +23,7 @@
       }
 
       /*.bar:hover {*/
-        /*fill: orangered ;*/
+      /*fill: orangered ;*/
       /*}*/
 
     </style>
@@ -50,7 +50,7 @@
         this.rebuildDataSet();
         this.updateColors("impact");
 
-        var margin = {top: 40, right: 20, bottom: 30, left: 40},
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
                 width = this.getBoundingClientRect().width - margin.left - margin.right,
                 height = 300 - margin.top - margin.bottom;
 
@@ -109,25 +109,6 @@
                   fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
                 });
 
-
-        function type(d) {
-          d.frequency = +d.frequency;
-          return d;
-        }
-      },
-      switchSelected: function(el){
-        if (typeof this.currentBar !== "undefined") {
-          this.currentBar.style("fill", function(d) {return d.color;})
-        }
-        this.currentBar = el
-        this.currentBar.style("fill", "#0000ff");
-      },
-      variantsChanged: function(oldVal, newVal) {
-        if (newVal.length == 0) return;
-        this.redraw()
-      },
-      showsc: function(e, detail, sender) {
-        this.switchSelected(d3.select(this.$.chart).selectAll("rect#name_" + detail.join("")))
       }
     }, window.sharedChartMixin));
   </script>

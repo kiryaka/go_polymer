@@ -44,6 +44,20 @@
     numchanged: function(e, detail, sender) {
       d3.select(this.$.chart).selectAll("*").remove();
       this.redraw()
+    },
+    switchSelected: function(el){
+      if (typeof this.currentBar !== "undefined") {
+        this.currentBar.style("fill", function(d) {return d.color;})
+      }
+      this.currentBar = el
+      this.currentBar.style("fill", "#0000ff");
+    },
+    variantsChanged: function(oldVal, newVal) {
+      if (newVal.length == 0) return;
+      this.redraw()
+    },
+    showsc: function(e, detail, sender) {
+      this.switchSelected(d3.select(this.$.chart).selectAll("#name_" + detail.join("")))
     }
   };
 </script>

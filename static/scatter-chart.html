@@ -24,15 +24,13 @@
 
         </style>
         <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
+        <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
 
-        <div class="container" center>
-            <svg id="scatterChart"></svg>
-        </div>
+        <svg id="chart"></svg>
     </template>
     <script>
-        Polymer({
+        Polymer(Polymer.mixin({
             created: function() {
-                // hint that items is an array
                 this.scenNumber = 0;
                 this.variants = [];
                 this.dataSet = [];
@@ -40,29 +38,12 @@
             costFunction: function(prob, impact){
                 return prob;
             },
-            numchanged: function(e, detail, sender) {
-                d3.select(this.$.scatterChart).selectAll("*").remove();
-                this.redraw()
-            },
             ready: function(){
-            },
-            rebuildDataSet: function(){
-                this.scenNumber = Math.pow(2, this.variants.length)
-                this.dataSet.length = this.scenNumber
-                for (var scenario = 0; scenario < this.scenNumber; scenario++){
-                    var obj = {id: scenario, prob: 1, impact: 0, weight: 0, endpoints: []}
-                    for (var factor = 0; factor < this.variants.length; factor++){
-                        var ep = (scenario & (1 << factor ) ) > 0 ? 1 : 0
-                        obj.endpoints.push(ep)
-                        obj.impact -= -this.variants[factor].endpoints[ep].impact;
-                        obj.prob *= this.variants[factor].endpoints[ep].prob;
-                    }
-                    obj.weight = this.costFunction(obj.weight, obj.prob);
-                    this.dataSet[scenario] = obj;
-                }
             },
             redraw: function(){
                 this.rebuildDataSet();
+                this.updateColors("impact");
+
                 var margin = {top: 20, right: 20, bottom: 30, left: 40},
                         width = width = this.getBoundingClientRect().width - margin.left - margin.right,
                         height = 300 - margin.top - margin.bottom;
@@ -72,8 +53,6 @@
 
                 var y = d3.scale.linear()
                         .range([height, 0]);
-
-                var color = d3.scale.category20b();
 
                 var xAxis = d3.svg.axis()
                         .scale(x)
@@ -90,9 +69,7 @@
                         .orient("left")
                         .tickFormat("");
 
-
-
-                var svg = d3.select(this.$.scatterChart)
+                var svg = d3.select(this.$.chart)
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
@@ -131,55 +108,24 @@
                         .attr("transform", "translate(" + x(0) + ",0)")
                         .call(yAxisNoText)
 
-                var badColors = ["#FF0000", "#FF1000", "#FF2000", "#FF3000", "#FF4000", "#FF5000", "#FF6000", "#FF7000", "#FF8000", "#FF9000", "#FFA000", "#FFB000", "#FFC000", "#FFD000", "#FFE000", "#FFF000", "#FFFF00"]
-                var goodColors = ["#FFFF00", "#F0FF00", "#E0FF00", "#D0FF00", "#C0FF00", "#B0FF00", "#A0FF00", "#90FF00", "#80FF00", "#70FF00", "#60FF00", "#50FF00", "#40FF00", "#30FF00", "#20FF00", "#10FF00", "#00FF00"]
-
-                var heatmapBadColour = d3.scale.linear()
-                        .domain(d3.range(0, 1, 1.0 / (badColors.length - 1)))
-                        .range(badColors);
-
-                var heatmapGoodColour = d3.scale.linear()
-                        .domain(d3.range(0, 1, 1.0 / (goodColors.length - 1)))
-                        .range(goodColors);
-
-
-                var cBad = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact < 0 ? d.impact : 0}))).range([0,1]);
-                var cGood = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact > 0 ? d.impact : 0}))).range([0,1]);
-
                 var fireFn = this.asyncFire.bind(this)
                 var currentDot
                 svg.selectAll(".dot")
                         .data(data)
                         .enter().append("circle")
+                        .attr("id", function(d){
+                            return "name_" + d.endpoints.join("");
+                        })
                         .attr("class", "dot")
                         .attr("r", 3.5)
                         .attr("cx", function(d) { return x(d.impact); })
                         .attr("cy", function(d) { return y(d.prob); })
-                        .style("fill", function(d) {
-                            return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
-                        })
-                        .on("mouseover", function(d) {
-
-                        })
-                        .on("mouseout", function(d) {
-
-                        })
-                        .on('click', function(geography) {
-                            if (typeof currentDot !== "undefined") {
-                                currentDot.style("fill", function(d) {
-                                    return d.impact > 0 ? heatmapGoodColour(cGood(d.impact)) : heatmapBadColour(cBad(d.impact));
-                                })
-                            }
-                            currentDot = d3.select(d3.event.currentTarget)
-                            currentDot.style("fill", "#0000ff");
+                        .style("fill", function(d) { return d.color; })
+                        .on('click', function(e) {
                             fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
                         });
 
-            },
-            variantsChanged: function(oldVal, newVal) {
-                if (newVal.length == 0) return;
-                this.redraw()
             }
-        });
+        }, window.sharedChartMixin));
     </script>
 </polymer-element>
