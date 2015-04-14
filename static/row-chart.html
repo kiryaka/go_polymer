@@ -25,35 +25,6 @@
         fill: orangered ;
       }
 
-      .d3-tip {
-        line-height: 1;
-        font-weight: bold;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        border-radius: 2px;
-      }
-
-      /* Creates a small triangle extender for the tooltip */
-      .d3-tip:after {
-        box-sizing: border-box;
-        display: inline;
-        font-size: 10px;
-        width: 100%;
-        line-height: 1;
-        color: rgba(0, 0, 0, 0.8);
-        content: "\25BC";
-        position: absolute;
-        text-align: center;
-      }
-
-      /* Style northward tooltips differently */
-      .d3-tip.n:after {
-        margin: -1px 0 0 0;
-        top: 100%;
-        left: 0;
-      }
-
     </style>
     <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
     <div class="container" layout horizontal center>
@@ -118,20 +89,11 @@
                 .orient("left")
                 .tickFormat(formatPercent);
 
-        var tip = d3.tip()
-                .attr('class', 'd3-tip')
-                .offset([-10, 0])
-                .html(function(d) {
-                  return "<strong>Probablility:</strong> <span style='color:red'>" + (100*d.prob) + "</span>";
-                })
-
         var svg = d3.select(this.$.chart)
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        svg.call(tip);
 
         this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
 
@@ -157,9 +119,7 @@
                 .attr("x", function(d) { return x(d.id); })
                 .attr("width", x.rangeBand())
                 .attr("y", function(d) { return y(d.prob); })
-                .attr("height", function(d) { return height - y(d.prob); })
-                .on('mouseover', tip.show)
-                .on('mouseout', tip.hide);
+                .attr("height", function(d) { return height - y(d.prob); });
 
 
         function type(d) {

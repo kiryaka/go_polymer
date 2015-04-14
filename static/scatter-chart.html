@@ -18,24 +18,9 @@
                 shape-rendering: crispEdges;
             }
 
-            div.tooltip {
-                position: absolute;
-                text-align: center;
-                width: 60px;
-                height: 28px;
-                padding: 2px;
-                font: 12px sans-serif;
-                background: lightsteelblue;
-                border: 0px;
-                border-radius: 8px;
-                pointer-events: none;
-                opacity: 0;
-            }
-
         </style>
         <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
 
-        <div id="toolDiv" class="tooltip"></div>
         <div class="container" center>
             <svg id="scatterChart"></svg>
         </div>
@@ -111,11 +96,6 @@
 
                 var data = this.dataSet
 
-//                d3.tsv("data.tsv", function(error, data) {
-//                    data.forEach(function(d) {
-//                        d.sepalLength = +d.sepalLength;
-//                        d.sepalWidth = +d.sepalWidth;
-//                    });
 
                 x.domain(d3.extent(data, function(d) { return d.impact; })).nice();
                 y.domain(d3.extent(data, function(d) { return d.prob; })).nice();
@@ -162,13 +142,6 @@
                 var cBad = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact < 0 ? d.impact : 0}))).range([0,1]);
                 var cGood = d3.scale.linear().domain(d3.extent(data.map(function(d){return d.impact > 0 ? d.impact : 0}))).range([0,1]);
 
-                var tip = d3.tip()
-                        .attr('class', 'd3-tip')
-                        .offset([-10, 0])
-                        .html(function(d) {
-                            return "<strong>Probablility:</strong> <span style='color:red'>" + (100*d.prob) + "</span>";
-                        })
-
                 var div = d3.select(this.$.toolDiv);
                 var fireFn = this.asyncFire.bind(this)
                 svg.selectAll(".dot")
@@ -183,20 +156,13 @@
                         })
                         .on("mouseover", function(d) {
                             fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
-                            div.transition()
-                                    .duration(200)
-                                    .style("opacity", .9);
-                            div .html("details")
-                                    .style("left", (d3.event.offsetX) + "px")
-                                    .style("top", (d3.event.offsetY - 28) + "px");
+
                         })
                         .on("mouseout", function(d) {
-                            div.transition()
-                                    .duration(500)
-                                    .style("opacity", 0);
+
                         })
                         .on('click', function(geography) {
-                            alert('asfd');
+
                         });
 
             },
