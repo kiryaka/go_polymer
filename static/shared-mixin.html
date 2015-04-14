@@ -1,0 +1,49 @@
+<script>
+  window.sharedChartMixin = {
+    registerDataSet: function(colorBase){
+      this.badColors = ["#FF0000", "#FF1000", "#FF2000", "#FF3000", "#FF4000", "#FF5000", "#FF6000", "#FF7000", "#FF8000", "#FF9000", "#FFA000", "#FFB000", "#FFC000", "#FFD000", "#FFE000", "#FFF000", "#FFFF00"]
+      this.goodColors = ["#FFFF00", "#F0FF00", "#E0FF00", "#D0FF00", "#C0FF00", "#B0FF00", "#A0FF00", "#90FF00", "#80FF00", "#70FF00", "#60FF00", "#50FF00", "#40FF00", "#30FF00", "#20FF00", "#10FF00", "#00FF00"]
+      this.cBad = d3.scale.linear().domain(d3.extent(this.dataSet.map(function(d){return d[colorBase] < 0 ? d[colorBase] : 0}))).range([0,1]);
+      this.cGood = d3.scale.linear().domain(d3.extent(this.dataSet.map(function(d){return d[colorBase] > 0 ? d[colorBase] : 0}))).range([0,1]);
+      this.heatmapBadColour = d3.scale.linear()
+              .domain(d3.range(0, 1, 1.0 / (this.badColors.length - 1)))
+              .range(this.badColors);
+
+      this.heatmapGoodColour = d3.scale.linear()
+              .domain(d3.range(0, 1, 1.0 / (this.goodColors.length - 1)))
+              .range(this.goodColors);
+    },
+    updateColors: function(colorBase){
+      if ( typeof this.badColors === "undefined" ){
+        this.registerDataSet(colorBase)
+      }
+      var ts = this
+      this.dataSet.map(function(d){
+        d.color = d[colorBase] > 0 ? ts.heatmapGoodColour(ts.cGood(d[colorBase])) : ts.heatmapBadColour(ts.cBad(d[colorBase]));
+        return d;
+      })
+
+    },
+    rebuildDataSet: function(){
+
+
+      this.scenNumber = Math.pow(2, this.variants.length)
+      this.dataSet.length = this.scenNumber
+      for (var scenario = 0; scenario < this.scenNumber; scenario++){
+        var obj = {id: scenario, prob: 1, impact: 0, weight: 0, color: "", endpoints: []}
+        for (var factor = 0; factor < this.variants.length; factor++){
+          var ep = (scenario & (1 << factor ) ) > 0 ? 1 : 0
+          obj.endpoints.push(ep)
+          obj.impact -= -this.variants[factor].endpoints[ep].impact;
+          obj.prob *= this.variants[factor].endpoints[ep].prob;
+        }
+        obj.weight = this.costFunction(obj.prob, obj.impact);
+        this.dataSet[scenario] = obj;
+      }
+    },
+    numchanged: function(e, detail, sender) {
+      d3.select(this.$.chart).selectAll("*").remove();
+      this.redraw()
+    }
+  };
+</script>
