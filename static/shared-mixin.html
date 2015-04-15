@@ -67,6 +67,7 @@
     numchanged: function(e, detail, sender) {
       d3.select(this.$.chart).selectAll("*").remove();
       this.redraw()
+      this.switchSelected(d3.select(this.$.chart).selectAll("#name_" + detail.join("")))
     },
     switchSelected: function(el){
       if (typeof this.currentBar !== "undefined") {

@@ -101,17 +101,19 @@
     </div>
 
     <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
+    <app-globals id="globals"></app-globals>
   </template>
   <script>
     Polymer({
       numChanged: function(e) {
         this.variant.endpoints[1].prob = d3.round(1 - this.variant.endpoints[0].prob, 2)
-        this.asyncFire('core-signal', {name: "numchanged", data: "Foo!"});
+        this.asyncFire('core-signal', {name: "numchanged", data: this.$.globals.values.curentScenario});
       },
       ready: function() {
       },
       showsc: function(e, detail, sender) {
         this.variant.uid
+        this.$.globals.values.curentScenario = detail
         this.variant.endpoints[detail[this.variant.uid-1]].selectedClass = "showsc";
         this.variant.endpoints[1-detail[this.variant.uid-1]].selectedClass = "";
       }
