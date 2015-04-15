@@ -31,6 +31,7 @@
       obj.normImpact = iScale(obj.impact);
       obj.normProb = pScale(obj.prob);
 
+      obj.weight['linear'] = obj.normImpact*obj.normProb/100;
       obj.weight['safe'] = obj.normImpact*obj.normProb*obj.normProb/10000;
       obj.weight['aggressive'] = Math.abs(obj.normImpact)*obj.normImpact*obj.normProb/10000;
 
@@ -51,10 +52,13 @@
       }
 
 
-      var minMax = d3.extent(this.dataSet.map(function(d){return d.impact}));
-      var iScale = d3.scale.linear().domain(minMax).range([-100, 100]);
+      var min = d3.min(this.dataSet.map(function(d){return d.impact}));
+      var max = d3.max(this.dataSet.map(function(d){return d.impact}));
+      if (Math.abs(min) > max) max = Math.abs(min);
 
-      var max = d3.max(this.dataSet.map(function(d){return d.prob}));
+      var iScale = d3.scale.linear().domain([-max, max]).range([-100, 100]);
+
+      max = d3.max(this.dataSet.map(function(d){return d.prob}));
       var pScale = d3.scale.linear().domain([0, max]).range([0, 100]);
 
       var el = this;

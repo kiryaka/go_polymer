@@ -51,7 +51,10 @@
                 var x = d3.scale.linear()
                         .range([0, width]);
 
-                var y = d3.scale.linear()
+//                var y = d3.scale.log()
+//                        .range([height, 0]);
+
+                var y = d3.scale.sqrt()
                         .range([height, 0]);
 
                 var xAxis = d3.svg.axis()
@@ -124,6 +127,9 @@
                         .on('click', function(e) {
                             fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
                         });
+
+                svg.selectAll("text")
+                        .style("font-size", "8px");
 
             }
         }, window.sharedChartMixin));

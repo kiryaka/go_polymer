@@ -50,6 +50,7 @@
                 this.rebuildDataSet();
                 this.updateColors(this.weightFn);
                 var _this = this;
+                this.dataSet = this.dataSet.filter(function(d){return (d.weight[_this.weightFn] > 0.5 || d.weight[_this.weightFn] < -0.5 )})
                 this.dataSet.sort(function(a,b){return d3.descending(a.weight[_this.weightFn], b.weight[_this.weightFn]);});
 
                 var margin = {top: 10, right: 10, bottom: 30, left: 40},
@@ -107,7 +108,27 @@
                             fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
                         });
 
+                svg.append("text")
+                        .attr("x", (width / 2))
+                        .attr("y", 2*margin.top)
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "16px")
+                        .text(this.weightFn + " strategy");
+
+                svg.append("text")
+                        .attr("x", (width / 2))
+                        .attr("y", 3.5*margin.top)
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "9px")
+                        .text(this.getDescByStrat(this.weightFn));
+
+            },
+            getDescByStrat: function(s){
+                if (s == "aggressive") return "Value impact more then probablitity"
+                if (s == "safe") return "Value probablitity more then impact"
+                if (s == "linear") return "Ballanced weight"
             }
+
         }, window.sharedChartMixin));
     </script>
 </polymer-element>

@@ -50,6 +50,9 @@
         this.rebuildDataSet();
         this.updateColors("impact");
 
+        this.dataSet = this.dataSet.filter(function(d){return d.prob > 0.005;})
+        this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
+
         var margin = {top: 20, right: 20, bottom: 30, left: 40},
                 width = this.getBoundingClientRect().width - margin.left - margin.right,
                 height = this.chartHeight - margin.top - margin.bottom;
@@ -78,7 +81,6 @@
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
         x.domain(this.dataSet.map(function(obj){    return obj.id;}));
         y.domain([0, d3.max(this.dataSet, function(obj){    return obj.prob;})]);
 
