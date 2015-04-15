@@ -2,7 +2,7 @@
 <link rel="import" href="shared-mixin.html">
 
 
-<polymer-element name="row-chart" attributes="variants">
+<polymer-element name="row-chart" attributes="variants chartHeight">
   <template>
     <style>
       :host {
@@ -52,7 +52,7 @@
 
         var margin = {top: 20, right: 20, bottom: 30, left: 40},
                 width = this.getBoundingClientRect().width - margin.left - margin.right,
-                height = 300 - margin.top - margin.bottom;
+                height = this.chartHeight - margin.top - margin.bottom;
 
         var formatPercent = d3.format(".0%");
 
@@ -80,7 +80,7 @@
 
         this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
         x.domain(this.dataSet.map(function(obj){    return obj.id;}));
-        y.domain([0, d3.max(this.dataSet, function(obj){    return obj.weight;})]);
+        y.domain([0, d3.max(this.dataSet, function(obj){    return obj.prob;})]);
 
         svg.append("g")
                 .attr("class", "x axis")

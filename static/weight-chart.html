@@ -1,0 +1,113 @@
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="shared-mixin.html">
+
+
+<polymer-element name="weight-chart" attributes="variants chartHeight weightFn">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: relative;
+                background-color: white;
+                width: 100%;
+            }
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
+
+            .bar {
+                fill: orange;
+            }
+
+            /*.bar:hover {*/
+            /*fill: orangered ;*/
+            /*}*/
+
+        </style>
+        <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
+        <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
+        <svg id="chart"></svg>
+
+    </template>
+    <script>
+        Polymer(Polymer.mixin({
+            created: function() {
+                // hint that items is an array
+                this.scenNumber = 0;
+                this.variants = [];
+                this.dataSet = [];
+            },
+            costFunction: function(prob, impact){
+                return prob;
+            },
+            ready: function(){
+
+            },
+            redraw: function(){
+                this.rebuildDataSet();
+                this.updateColors(this.weightFn);
+                var _this = this;
+                this.dataSet.sort(function(a,b){return d3.descending(a.weight[_this.weightFn], b.weight[_this.weightFn]);});
+
+                var margin = {top: 10, right: 10, bottom: 30, left: 40},
+                        width = this.getBoundingClientRect().width - margin.left - margin.right,
+                        height = this.chartHeight - margin.top - margin.bottom;
+
+                var x = d3.scale.ordinal()
+                        .rangeRoundBands([0, width], .1)
+                        .domain(this.dataSet.map(function(obj){ return obj.id;}));
+
+                var y0 = Math.max(Math.abs(d3.min(this.dataSet, function(obj){  return obj.weight[_this.weightFn];})), Math.abs(d3.max(this.dataSet, function(obj){  return obj.weight[_this.weightFn];})));
+                var y = d3.scale.linear()
+                        .domain([-y0, y0])
+                        .range([height,0])
+                        .nice();
+
+                var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+//                        .tickFormat(formatPercent);
+
+                var svg = d3.select(this.$.chart)
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .append("line")
+                        .attr("y1", y(0))
+                        .attr("y2", y(0))
+                        .attr("x1", 0)
+                        .attr("x2", width);
+
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis);
+
+                var fireFn = this.asyncFire.bind(this)
+
+                svg.selectAll(".bar")
+                        .data(this.dataSet)
+                        .enter().append("rect")
+                        .attr("id", function(d){
+                            return "name_" + d.endpoints.join("");
+                        })
+                        .attr("class", "bar")
+                        .attr("x", function(d) { return x(d.id); })
+                        .attr("width", x.rangeBand())
+                        .attr("y", function(d) { return y(Math.max(0, d.weight[_this.weightFn])); })
+                        .attr("height", function(d) { return Math.abs(y(d.weight[_this.weightFn]) - y(0)); })
+                        .style("fill", function(d) {return d.color;})
+                        .on('click', function(e) {
+                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
+                        });
+
+            }
+        }, window.sharedChartMixin));
+    </script>
+</polymer-element>

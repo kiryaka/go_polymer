@@ -4,6 +4,7 @@
 <link rel="import" href="variant-row.html">
 <link rel="import" href="row-chart.html">
 <link rel="import" href="scatter-chart.html">
+<link rel="import" href="weight-chart.html">
 
 <polymer-element name="variant-list" attributes="show">
   <template variants="{{variants}}">
@@ -26,9 +27,15 @@
     <core-xhr id="xhr" method="POST"></core-xhr>
     <core-signals on-core-signal-foo="{{fooSignal}}"></core-signals>
 
-    <div layout horizontal>
-      <scatter-chart variants="{{variants}}"  flex three></scatter-chart>
-      <row-chart variants="{{variants}}" flex four></row-chart>
+    <div layout vertical>
+      <div layout horizontal>
+        <scatter-chart variants="{{variants}}" chartHeight="200"  flex three></scatter-chart>
+        <row-chart variants="{{variants}}" chartHeight="200" flex four></row-chart>
+      </div>
+      <div layout horizontal>
+        <weight-chart variants="{{variants}}" chartHeight="200" weightFn="aggressive"></weight-chart>
+        <weight-chart variants="{{variants}}" chartHeight="200" weightFn="safe"></weight-chart>
+      </div>
     </div>
 
   </template>
