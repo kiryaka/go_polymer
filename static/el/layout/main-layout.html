@@ -1,0 +1,135 @@
+
+<script src="/bower_components/d3/d3.min.js"></script>
+<script src="/bower_components/underscore/underscore-min.js"></script>
+<script src="/bower_components/crossfilter/crossfilter.min.js"></script>
+<script src="/bower_components/dcjs/dc.min.js"></script>
+<script src="/bower_components/colorbrewer/colorbrewer.js"></script>
+
+<link rel="import" href="/bower_components/font-roboto/roboto.html">
+<link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="/bower_components/paper-shadow/paper-shadow.html">
+
+<link rel="import" href="/bower_components/font-roboto/roboto.html">
+<link rel="import" href="/bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="/bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/bower_components/core-selector/core-selector.html">
+
+
+<link rel="import" href="/variant-list.html">
+<link rel="import" href="/app-globals.html">
+<link rel="import" href="/el/layout/two-fixed.html">
+
+<polymer-element name="main-layout" attributes="rawdata">
+    <template>
+        <style shim-shadowdom>
+            core-header-panel {
+                height: 100%;
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            core-toolbar {
+                background: #03a9f4;
+                color: white;
+            }
+            #tabs {
+                width: 100%;
+                margin: 0;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                text-transform: uppercase;
+            }
+            #main_container {
+                margin: 8px;
+                padding: 4px;
+                overflow: hidden;
+                border-radius: 4px;
+                background-color: white;
+            }
+            @media (min-width: 1200px) {
+                #tabs {
+                    width: 500px;
+                }
+                section {
+                    width: 100%;
+                }
+            }
+
+            paper-item {
+                color: black;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            html /deep/ core-collapse {
+                border: 1px solid #ccc;
+                padding: 8px;
+            }
+
+            .dropdown.colored::shadow #ripple,
+            .dropdown.colored::shadow #background {
+                border: 1px solid #0f9d58;
+                background-color: #b7e1cd;
+            }
+
+            #main_container section {
+                display: none;
+            }
+
+            #main_container section[visible]{
+                display: block !important;
+            }
+
+        </style>
+
+        <core-header-panel>
+
+            <core-toolbar>
+
+                <div horizontal layout flex>
+
+                    <paper-tabs id="tabs" selected="1" on-core-select="{{tabChanged}}">
+                        <paper-tab>Dashboard</paper-tab>
+                        <paper-tab>Analysis</paper-tab>
+                        <paper-tab>Database</paper-tab>
+                    </paper-tabs>
+
+                </div>
+                <paper-icon-button id="saveIcon" icon="save" on-tap="{{saveVariantSignal}}"></paper-icon-button>
+            </core-toolbar>
+
+            <core-selector multi="false" selected="0" id="selector" target="{{$.main_container}}" itemsSelector="section" selectedAttribute="visible"></core-selector>
+
+            <paper-shadow z="1" id="main_container" fit>
+                <section>
+                    <variant-list show="all" rawdata="{{rawdata}}"/>
+                </section>
+                <section>
+                    <median-chart variants="{{variants}}" rawdata="{{rawdata}}"></median-chart>
+                </section>
+                <section>
+                    <median-chart variants="{{variants}}" rawdata="{{rawdata}}"></median-chart>
+                </section>
+            </paper-shadow>
+
+        </core-header-panel>
+    </template>
+
+    <script>
+        Polymer({
+            rawdata: [],
+            ready: function(){
+
+            },
+            tabChanged: function(){
+                this.$.selector.selected = this.$.tabs.selected;
+            },
+            ready: function(){
+                this.dataset = [1,2,3];
+            }
+        });
+    </script>
+</polymer-element>

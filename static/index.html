@@ -7,17 +7,19 @@
 
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
-  <script src="/components/webcomponentsjs/webcomponents.js">
+  <script src="/bower_components/webcomponentsjs/webcomponents.js">
   </script>
 
-  <script src="/components/d3/d3.js">
+  <script src="/bower_components/d3/d3.js">
   </script>
 
-  <link rel="import" href="../components/font-roboto/roboto.html">
-  <link rel="import" href="/components/core-header-panel/core-header-panel.html">
-  <link rel="import" href="/components/core-toolbar/core-toolbar.html">
-  <link rel="import" href="/components/paper-tabs/paper-tabs.html">
-  <link rel="import" href="/components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="../bower_components/font-roboto/roboto.html">
+  <link rel="import" href="/bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="/bower_components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="/bower_components/core-animated-pages/core-animated-pages.html">
+  <link rel="import" href="/bower_components/core-animated-pages/transitions/slide-from-right.html">
 
   <link rel="import" href="variant-list.html">
   <link rel="import" href="app-globals.html">
@@ -53,7 +55,7 @@
     }
     @media (min-width: 481px) {
       #tabs {
-        width: 200px;
+        width: 400px;
       }
       .container {
         width: 98%;
@@ -90,9 +92,10 @@
 
       <div horizontal layout flex>
 
-        <paper-tabs id="tabs" selected="all" self-end>
-          <paper-tab name="all">All</paper-tab>
-          <paper-tab name="favorites">Favorites</paper-tab>
+        <paper-tabs id="tabs" selected="1">
+          <paper-tab>list</paper-tab>
+          <paper-tab>Dashboard</paper-tab>
+          <paper-tab>details</paper-tab>
         </paper-tabs>
 
       </div>
@@ -101,7 +104,7 @@
   </core-toolbar>
 
   <div class="container" layout vertical center>
-    <variant-list show="all"/>
+          <variant-list show="all"/>
   </div>
 
 </core-header-panel>

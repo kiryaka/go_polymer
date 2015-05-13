@@ -1,7 +1,7 @@
-<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/bower_components/polymer/polymer.html">
 
 
-<polymer-element name="scatter-chart" attributes="variants chartHeight">
+<polymer-element name="scatter-chart" attributes="variants chartHeight rawdata">
     <template>
         <style>
             :host {
@@ -38,6 +38,7 @@
                 this.scenNumber = 0;
                 this.variants = [];
                 this.dataSet = [];
+                this.rawdata = [];
             },
             costFunction: function(prob, impact){
                 return prob;
@@ -46,10 +47,11 @@
             },
             redraw: function(){
                 this.rebuildDataSet();
+                this.rawdata = this.dataSet.slice();
                 this.updateColors("impact");
 
                 var margin = {top: 20, right: 20, bottom: 30, left: 40},
-                        width = width = this.getBoundingClientRect().width - margin.left - margin.right,
+                        width = this.getBoundingClientRect().width - margin.left - margin.right,
                         height = this.chartHeight - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
@@ -85,7 +87,9 @@
                 var data = this.dataSet
 
 
-                x.domain(d3.extent(data, function(d) { return d.impact; })).nice();
+                x.domain(d3.extent(data, function(d) {
+                    return d.impact;
+                })).nice();
                 y.domain(d3.extent(data, function(d) { return d.prob; })).nice();
 
                 svg.append("g")

@@ -18,7 +18,7 @@ func init() {
 
 	r := mux.NewRouter()
 
-	polymer := r.PathPrefix("/components").Subrouter()
+	polymer := r.PathPrefix("/bower_components").Subrouter()
 	polymer.HandleFunc("/{rest:.*}", polymerComponents)
 
 	sr := r.PathPrefix("/api").Subrouter()
@@ -46,13 +46,13 @@ func saveVariants(w http.ResponseWriter, r *http.Request) {
 }
 
 func polymerComponents(w http.ResponseWriter, r *http.Request) {
-	log.Println("path:", r.URL.Path)
-	http.ServeFile(w, r, "bower_"+strings.TrimPrefix(r.URL.Path, "/"))
+	log.Println("path:%s ", "." + r.URL.Path)
+	http.ServeFile(w, r, "." + r.URL.Path)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	log.Println("path:", r.URL.Path)
-	http.ServeFile(w, r, "static/"+r.URL.Path)
+	log.Println("path:%s, serve: %s", r.URL.Path, "static/"+strings.TrimPrefix(r.URL.Path, "/"))
+	http.ServeFile(w, r, "static/"+strings.TrimPrefix(r.URL.Path, "/"))
 }
 
 type Post struct {

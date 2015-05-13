@@ -1,17 +1,19 @@
-<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/service/variant-service.html">
-<link rel="import" href="/components/core-signals/core-signals.html">
+<link rel="import" href="/bower_components/core-signals/core-signals.html">
 <link rel="import" href="variant-row.html">
 <link rel="import" href="row-chart.html">
 <link rel="import" href="scatter-chart.html">
 <link rel="import" href="weight-chart.html">
+<link rel="import" href="/el/chart/median-chart.html">
 
-<polymer-element name="variant-list" attributes="show">
+<polymer-element name="variant-list" attributes="show rawdata">
   <template variants="{{variants}}">
     <style>
       :host {
         display: block;
-        width: 90%;
+        width: 100%;
+        margin: auto;
       }
 
     </style>
@@ -29,13 +31,13 @@
 
     <div layout vertical>
       <div layout horizontal>
-        <scatter-chart variants="{{variants}}" chartHeight="200"  flex three></scatter-chart>
+        <scatter-chart variants="{{variants}}" rawdata="{{rawdata}}" chartHeight="200"  flex three></scatter-chart>
         <row-chart variants="{{variants}}" chartHeight="200" flex four></row-chart>
       </div>
       <div layout horizontal>
-        <weight-chart variants="{{variants}}" chartHeight="200" weightFn="linear"></weight-chart>
-        <weight-chart variants="{{variants}}" chartHeight="200" weightFn="aggressive"></weight-chart>
-        <weight-chart variants="{{variants}}" chartHeight="200" weightFn="safe"></weight-chart>
+        <weight-chart rawdata="{{rawdata}}" chartHeight="200" weightFn="linear"></weight-chart>
+        <weight-chart rawdata="{{rawdata}}" chartHeight="200" weightFn="aggressive"></weight-chart>
+        <weight-chart rawdata="{{rawdata}}" chartHeight="200" weightFn="safe"></weight-chart>
       </div>
     </div>
 
@@ -43,6 +45,7 @@
 
   <script>
     Polymer({
+      dataset: [],
       created: function() {
         // hint that items is an array
         this.variants = [];

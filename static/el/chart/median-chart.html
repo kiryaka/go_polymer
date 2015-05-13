@@ -1,0 +1,197 @@
+
+<polymer-element name="median-chart" attributes="rawdata">
+    <template>
+        <style shim-shadowdom>
+
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
+
+            svg {
+                font: 10px sans-serif;
+            }
+
+            .grid .tick {
+                stroke: lightgrey;
+                opacity: 0.2;
+            }
+
+            .pline {
+                fill: none;
+                stroke: green;
+                stroke-width: 1.5px;
+            }
+
+            .nline {
+                fill: none;
+                stroke: red;
+                stroke-width: 1.5px;
+            }
+
+            .pcircle {
+                stroke: green;
+                fill: white;
+                fill-opacity: .7;
+            }
+
+            .ncircle {
+                stroke: red;
+                fill: white;
+                /*fill-opacity: .7;*/
+            }
+
+        </style>
+
+        <div id="map"></div>
+    </template>
+
+    <script>
+        Polymer({
+            ready: function(){
+
+            },
+            redraw: function(){
+                this.processData();
+
+                var margin = {top: 20, right: 30, bottom: 30, left: 40},
+                        width = 800 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                var x = d3.scale.linear()
+                        .range([0, width]);
+
+                var y = d3.scale.linear()
+                        .range([height, 0]);
+
+                var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom")
+                        .tickFormat(d3.format(".1%"));
+
+                var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left");
+
+                var line = d3.svg.line()
+                        .interpolate(interpolateSankey)
+                        .x(function(d) { return x(d.x); })
+                        .y(function(d) { return y(d.y); });
+
+                var svg = d3.select(this.$.map).append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var dom = this.positive.concat(this.negative);
+                console.log(dom);
+                x.domain(d3.extent(dom, function(d) { return d.x; }));
+                y.domain(d3.extent(dom, function(d) { return d.y; }));
+
+                svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + y(0) + ")")
+//                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis);
+
+//                var numberOfTicks = 10;
+//
+//                var yAxisGrid = yAxis.ticks(numberOfTicks)
+//                        .tickSize(width, 0)
+//                        .tickFormat("")
+//                        .orient("right");
+//
+//                var xAxisGrid = xAxis.ticks(numberOfTicks)
+//                        .tickSize(-height, 0)
+//                        .tickFormat("")
+//                        .orient("top");
+//
+//                svg.append("g")
+//                        .classed('y', true)
+//                        .classed('grid', true)
+//                        .call(yAxisGrid);
+//
+//                svg.append("g")
+//                        .classed('x', true)
+//                        .classed('grid', true)
+//                        .call(xAxisGrid);
+
+                svg.append("path")
+                        .datum(this.positive)
+                        .attr("class", "pline")
+                        .attr("d", line);
+
+                svg.append("g").selectAll("circle")
+                        .data(this.positive.filter(clasterize))
+                        .enter().append("circle") // <-C
+                        .attr("class", "pcircle")
+                        .attr("cx", function(d) { return x(d.x); })
+                        .attr("cy", function(d) { return y(d.y); })
+                        .attr("r", 2);
+
+
+                svg.append("path")
+                        .datum(this.negative)
+                        .attr("class", "nline")
+                        .attr("d", line);
+
+                svg.append("g").selectAll("circle")
+                        .data(this.negative.filter(clasterize))
+                        .enter().append("circle") // <-C
+                        .attr("class", "ncircle")
+                        .attr("cx", function(d) { return x(d.x); })
+                        .attr("cy", function(d) { return y(d.y); })
+                        .attr("r", 2);
+
+                function clasterize(d, i, a ){
+                    if ( i == 0 ) return true;
+                    return Math.abs(d.x - a[i-1].x) > 0.005;
+                }
+
+                function interpolateSankey(points) {
+                    var x0 = points[0][0], y0 = points[0][1], x1, y1, x2,
+                            path = [x0, ",", y0],
+                            i = 0,
+                            n = points.length;
+                    while (++i < n) {
+                        x1 = points[i][0], y1 = points[i][1], x2 = (x0 + x1) / 2;
+                        path.push("C", x2, ",", y0, " ", x2, ",", y1, " ", x1, ",", y1);
+                        x0 = x1, y0 = y1;
+                    }
+                    return path.join("");
+                }
+
+            },
+            processData: function(){
+                this.positive = this.buildData(this.rawdata.sort(function(a,b){return d3.descending(a.weight.aggressive, b.weight.aggressive);}));
+                this.negative = this.buildData(this.rawdata.sort(function(a,b){return d3.ascending(a.weight.aggressive, b.weight.aggressive);}));
+            },
+            buildData: function(arr){
+                var result = [];
+                var prob = [], imp = [], probSum = 0;
+                for(var i = 0; i < arr.length; i++){
+                    probSum += arr[i].prob;
+                    prob.push(arr[i].prob);
+                    imp.push(arr[i].impact);
+
+                    var median = imp.reduce(function(previousValue, currentValue, index) {
+                        return previousValue + currentValue*prob[index]/probSum;
+                    }, 0);
+
+                    result.push({x: probSum, y: median});
+                }
+                return result;
+            },
+            rawdataChanged: function(o, n){
+                if (n && n.length > 0) this.redraw();
+            }
+        });
+    </script>
+</polymer-element>

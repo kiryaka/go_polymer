@@ -1,8 +1,8 @@
-<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="shared-mixin.html">
 
 
-<polymer-element name="weight-chart" attributes="variants chartHeight weightFn">
+<polymer-element name="weight-chart" attributes="rawdata chartHeight weightFn">
     <template>
         <style>
             :host {
@@ -21,10 +21,8 @@
             text {
                 font-size: 10px;
             }
-
-
         </style>
-        <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
+        <crtre-signals on-core-signal-numchanged="{{numchanged}}"></crtre-signals>
         <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
         <svg id="chart"></svg>
 
@@ -43,8 +41,12 @@
             ready: function(){
 
             },
+            rawdataChanged: function(o, n){
+                if (n && n.length > 0) this.redraw();
+            },
             redraw: function(){
-                this.rebuildDataSet();
+//                this.rebuildDataSet();
+                this.dataSet = this.rawdata;
                 this.updateColors(this.weightFn);
                 var _this = this;
                 this.dataSet = this.dataSet.filter(function(d){return (d.weight[_this.weightFn] > 0.5 || d.weight[_this.weightFn] < -0.5 )})
