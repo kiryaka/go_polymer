@@ -14,9 +14,18 @@
                 font: 10px sans-serif;
             }
 
+            text{
+                fill: #666;
+            }
+
             .grid .tick {
                 stroke: lightgrey;
-                opacity: 0.2;
+                opacity: 0.5;
+            }
+
+            .tick line {
+                stroke: lightgrey;
+                opacity: 0.5;
             }
 
             .pline {
@@ -34,7 +43,7 @@
             .pcircle {
                 stroke: green;
                 fill: white;
-                fill-opacity: .7;
+                /*fill-opacity: .7;*/
             }
 
             .ncircle {
@@ -54,8 +63,6 @@
 
             },
             redraw: function(){
-                this.processData();
-
                 var margin = {top: 20, right: 30, bottom: 30, left: 40},
                         width = 800 - margin.left - margin.right,
                         height = 400 - margin.top - margin.bottom;
@@ -88,8 +95,8 @@
 
                 var dom = this.positive.concat(this.negative);
                 console.log(dom);
-                x.domain(d3.extent(dom, function(d) { return d.x; }));
-                y.domain(d3.extent(dom, function(d) { return d.y; }));
+                x.domain(d3.extent(dom, function(d) { return d.x; })).nice();
+                y.domain(d3.extent(dom, function(d) { return d.y; })).nice();
 
                 svg.append("g")
                         .attr("class", "x axis")
@@ -101,27 +108,27 @@
                         .attr("class", "y axis")
                         .call(yAxis);
 
-//                var numberOfTicks = 10;
-//
-//                var yAxisGrid = yAxis.ticks(numberOfTicks)
-//                        .tickSize(width, 0)
-//                        .tickFormat("")
-//                        .orient("right");
-//
-//                var xAxisGrid = xAxis.ticks(numberOfTicks)
-//                        .tickSize(-height, 0)
-//                        .tickFormat("")
-//                        .orient("top");
-//
-//                svg.append("g")
-//                        .classed('y', true)
-//                        .classed('grid', true)
-//                        .call(yAxisGrid);
-//
-//                svg.append("g")
-//                        .classed('x', true)
-//                        .classed('grid', true)
-//                        .call(xAxisGrid);
+                var numberOfTicks = 10;
+
+                var yAxisGrid = yAxis.ticks(numberOfTicks)
+                        .tickSize(width, 0)
+                        .tickFormat("")
+                        .orient("right");
+
+                var xAxisGrid = xAxis.ticks(numberOfTicks)
+                        .tickSize(-height, 0)
+                        .tickFormat("")
+                        .orient("top");
+
+                svg.append("g")
+                        .classed('y', true)
+                        .classed('grid', true)
+                        .call(yAxisGrid);
+
+                svg.append("g")
+                        .classed('x', true)
+                        .classed('grid', true)
+                        .call(xAxisGrid);
 
                 svg.append("path")
                         .datum(this.positive)
@@ -170,8 +177,20 @@
 
             },
             processData: function(){
-                this.positive = this.buildData(this.rawdata.sort(function(a,b){return d3.descending(a.weight.aggressive, b.weight.aggressive);}));
-                this.negative = this.buildData(this.rawdata.sort(function(a,b){return d3.ascending(a.weight.aggressive, b.weight.aggressive);}));
+                this.impMax = d3.max(this.rawdata, function(d){return d.impact});
+                this.impMin = d3.min(this.rawdata, function(d){return d.impact});
+                this.positive = this.buildData(this.rawdata.sort(this.positiveSort.bind(this)));
+                this.negative = this.buildData(this.rawdata.sort(this.negativeSort.bind(this)));
+            },
+            positiveSort: function(a,b){
+                if (a.impact == this.impMax) return -1;
+                if (b.impact == this.impMax) return 1;
+                return d3.descending(a.weight.median, b.weight.median);
+            },
+            negativeSort: function(a,b){
+                if (a.impact == this.impMin) return -1;
+                if (b.impact == this.impMin) return 1;
+                return d3.ascending(a.weight.median, b.weight.median);
             },
             buildData: function(arr){
                 var result = [];
@@ -190,7 +209,10 @@
                 return result;
             },
             rawdataChanged: function(o, n){
-                if (n && n.length > 0) this.redraw();
+                if (n && n.length > 0){
+                    this.processData();
+                    this.redraw();
+                }
             }
         });
     </script>

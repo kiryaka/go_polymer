@@ -3,120 +3,128 @@
 <link href="/bower_components/core-field/core-field.html" rel="import">
 
 <polymer-element name="variant-row" attributes="variant">
-  <template>
-    <style>
-      :host {
-        display: block;
-        background-color: white;
-        width: 100%;
-        font-size: 0.6rem;
-        font-weight: 300;
-      }
+    <template>
+        <style>
+            :host {
+                display: block;
+                background-color: white;
+                width: 100%;
+                font-weight: 300;
+            }
 
-      core-icon-button {
-        position: absolute;
-        top: 3px;
-        right: 3px;
-        color: #636363;
-      }
+            core-icon-button {
+                position: absolute;
+                top: 3px;
+                right: 3px;
+                color: #636363;
+            }
 
-      :host([favorite]) core-icon-button {
-        color: #da4336;
-      }
+            :host([favorite]) core-icon-button {
+                color: #da4336;
+            }
 
-      .endpoints .num {
-        width: 40px;
-      }
+            .endpoints .num {
+                width: 40px;
+            }
 
-      core-field.ep_1{
-        background-color: #eee;
-      }
+            core-field.ep_1{
+                background-color: #eee;
+            }
 
-      core-field /deep/ ::content  input{
-        font-size: 0.8rem;
-      }
+            core-field /deep/ ::content  input{
+                font-size: 10px;
+                line-height: 10px;
+            }
 
-      core-field {
-        border: 1px solid #ddd;
-        margin: 2px;
-        height: 20px;
-      }
+            core-field {
+                border: 1px solid #ddd;
+                margin: 1px;
+                height: 14px;
+            }
 
-      core-field.showsc{
-        border: 1px solid red;
-      }
+            core-field.showsc{
+                border: 1px solid red;
+            }
 
-      .variant_header{
-        height: 52px;
-      }
+            .variant_header{
+                height: 34px;
+                margin-bottom: 1px;
+            }
 
-      .variantInput{
-        height: 46px;
-      }
+            .variantInput{
+                height: 32px;
+            }
 
-      .rowNum{
-        height: 46px;
-        line-height: 46px;
-        border: 1px solid #ddd;
-        margin: 2px;
-        padding: 0 10px 0 10px;
-        vertical-align: middle;
-        font-size: 1.4rem;
-      }
+            .rowNum{
+                height: 32px;
+                line-height: 32px;
+                border: 1px solid #ddd;
+                margin: 2px;
+                padding: 0 10px 0 10px;
+                vertical-align: middle;
+                font-size: 1.4rem;
+            }
 
-      input{
-        width: 100%;
-      }
+            input{
+                width: 100%;
+            }
+
+            .intInput{
+                text-align: center;
+                border-bottom: solid 1px #aaa !important;
+            }
 
 
-    </style>
+        </style>
 
-    <div class="variant_header" layout horizontal center>
+        <div class="variant_header" layout horizontal center>
 
-      <div class="rowNum" layout center> {{variant.uid}} </div>
-      <core-field flex two class="variantInput">
-        <input is="core-input" placeholder="variant description" value="{{variant.text}}">
-      </core-field>
-      <div vertical layout class="endpoints" flex three>
-        <template repeat="{{endpoint, index in variant.endpoints}}" id="eps">
-          <div layout horizontal center>
-            <core-field flex class="endpoint {{endpoint.selectedClass}}">
-              <input is="core-input" placeholder="variant endpoint" value="{{endpoint.text}}">
+            <div class="rowNum" layout center> {{variant.uid}} </div>
+            <core-field flex two class="variantInput" layout horizontal>
+                <input is="core-input" placeholder="variant description" value="{{variant.text}}" flex ten>
+                <input is="core-input" class="intInput" placeholder="prob" value="{{variant.probDiff}}" flex one>
+                <input is="core-input" class="intInput" placeholder="cost" value="{{variant.cost}}" flex one>
             </core-field>
-            <core-field label="probablility" class="num ep_{{index}}">
-              <template if="{{index == 0}}">
-                <input is="core-input" value="{{endpoint.prob}}" on-change="{{numChanged}}" >
-              </template>
-              <template if="{{index == 1}}">
-                <input is="core-input" value="{{endpoint.prob}}" disabled >
-              </template>
-            </core-field>
-            <core-field label="impact" class="num">
-              <input is="core-input" value="{{endpoint.impact}}" on-change="{{numChanged}}">
-            </core-field>
-          </div>
-        </template>
-      </div>
+            <div vertical layout class="endpoints" flex three>
+                <template repeat="{{endpoint, index in variant.endpoints}}" id="eps">
+                    <div layout horizontal center>
+                        <core-field flex class="endpoint {{endpoint.selectedClass}}">
+                            <input is="core-input" placeholder="variant endpoint" value="{{endpoint.text}}">
+                        </core-field>
+                        <core-field label="probablility" class="num ep_{{index}}">
+                            <template if="{{index == 0}}">
+                                <input is="core-input" value="{{endpoint.prob}}" on-change="{{numChanged}}" >
+                            </template>
+                            <template if="{{index == 1}}">
+                                <input is="core-input" value="{{endpoint.prob}}" disabled >
+                            </template>
+                        </core-field>
+                        <core-field label="impact" class="num">
+                            <input is="core-input" value="{{endpoint.impact}}" on-change="{{numChanged}}">
+                        </core-field>
+                    </div>
+                </template>
+            </div>
 
-    </div>
+        </div>
 
-    <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
-    <app-globals id="globals"></app-globals>
-  </template>
-  <script>
-    Polymer({
-      numChanged: function(e) {
-        this.variant.endpoints[1].prob = d3.round(1 - this.variant.endpoints[0].prob, 2)
-        this.asyncFire('core-signal', {name: "numchanged", data: this.$.globals.values.curentScenario});
-      },
-      ready: function() {
-      },
-      showsc: function(e, detail, sender) {
-        this.variant.uid
-        this.$.globals.values.curentScenario = detail
-        this.variant.endpoints[detail[this.variant.uid-1]].selectedClass = "showsc";
-        this.variant.endpoints[1-detail[this.variant.uid-1]].selectedClass = "";
-      }
-    });
-  </script>
+        <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
+        <app-globals id="globals"></app-globals>
+    </template>
+    <script>
+        Polymer({
+            numChanged: function(e) {
+                this.variant.endpoints[1].prob = d3.round(1 - this.variant.endpoints[0].prob, 2)
+                this.asyncFire('core-signal', {name: "numchanged", data: this.$.globals.values.curentScenario});
+            },
+            ready: function() {
+            },
+            showsc: function(e, detail, sender) {
+                this.variant.uid
+                this.$.globals.values.curentScenario = detail
+                this.variant.endpoints[detail[this.variant.uid-1]].selectedClass = "showsc";
+                this.variant.endpoints[1-detail[this.variant.uid-1]].selectedClass = "";
+            }
+        });
+    </script>
 </polymer-element>
