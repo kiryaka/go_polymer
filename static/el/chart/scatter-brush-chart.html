@@ -77,11 +77,13 @@
                         .domain(d3.extent(this.rawdata, function(d) { return d.affAbility; })).nice()
                         .range([height, 0]);
 
-                var data = this.rawdata.map(function(d) { return [x(d.budget),y(d.affAbility)]; });
+                var data = this.rawdata.map(function(d) { return [d.budget, d.affAbility]; });
 
                 var quadtree = d3.geom.quadtree()
+                        .x(function(d) { return d.budget; })
+                        .y(function(d) { return d.affAbility; })
                         .extent([[-1, -1], [width + 1, height + 1]])
-                (data);
+                (this.rawdata);
 
                 var xAxis = d3.svg.axis()
                         .scale(x)
@@ -106,11 +108,11 @@
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 var point = svg.selectAll(".point")
-                        .data(data)
+                        .data(this.rawdata)
                         .enter().append("circle")
                         .attr("class", "point")
-                        .attr("cx", function(d) { return d[0]; })
-                        .attr("cy", function(d) { return d[1]; })
+                        .attr("cx", function(d) { return x(d.budget); })
+                        .attr("cy", function(d) { return y(d.affAbility); })
                         .attr("r", 4);
 
                 svg.append("g")
@@ -136,7 +138,9 @@
                 function search(quadtree, x0, y0, x3, y3) {
                     quadtree.visit(function(node, x1, y1, x2, y2) {
                         var p = node.point;
-                        if (p) p.selected = (p[0] >= x0) && (p[0] < x3) && (p[1] >= y0) && (p[1] < y3);
+                        if (p){
+                            p.selected = (p.budget >= x0) && (p.budget < x3) && (p.affAbility >= y0) && (p.affAbility < y3);
+                        }
                         return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
                     });
                 }
