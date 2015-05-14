@@ -180,6 +180,8 @@
                     var p = svg.append("path")
                             .attr("class", "pline" + inClass)
                             .attr("d", line)
+                            .on("mouseenter", onmouseover)
+                            .on("mouseleave", onmouseout)
                             .attr("id", "b" + data.id);
 
 
@@ -268,7 +270,7 @@
                     var svg = d3.select(this.ownerSVGElement);
                     svg.selectAll("path#" + this.id)
                             .style("opacity", 1)
-                            .style("stroke-width", "2px");
+                            .style("stroke-width", "3px");
                     svg.selectAll("path#" + this.id + "area")
                             .classed("vis", true);
 
