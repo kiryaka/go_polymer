@@ -1,6 +1,7 @@
 
 <link rel="import" href="/el/chart/median-chart.html">
 <link rel="import" href="/el/chart/scatter-brush-chart.html">
+<link rel="import" href="/el/chart/average-bar-chart.html">
 <link rel="import" href="/el/card/forecast-card.html">
 <polymer-element name="analysis-layout" attributes="rawdata variants">
     <template>
@@ -16,6 +17,7 @@
             <div flex eight layout vertical style="margin-left: 10px; ">
                 <forecast-card variants="{{variants}}"></forecast-card>
                 <scatter-brush-chart variants="{{variants}}" rawdata="{{rawdata}}"></scatter-brush-chart>
+                <average-bar-chart rawdata="{{rawdata}}"></average-bar-chart>
             </div>
 
         </div>

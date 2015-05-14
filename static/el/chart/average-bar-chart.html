@@ -1,0 +1,101 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+
+<polymer-element name="average-bar-chart" attributes="rawdata">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: relative;
+                background-color: white;
+                width: 100%;
+            }
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
+
+            text {
+                font-size: 10px;
+            }
+
+
+        </style>
+        <svg id="chart"></svg>
+
+    </template>
+    <script>
+        Polymer({
+
+            ready: function(){
+
+            },
+            redraw: function(){
+
+                var margin = {top: 20, right: 20, bottom: 30, left: 40},
+                        width = this.getBoundingClientRect().width - margin.left - margin.right,
+                        height = 200 - margin.top - margin.bottom;
+
+                var formatPercent = d3.format(".0%");
+
+                var x = d3.scale.ordinal()
+                        .rangeRoundBands([0, width], .1);
+
+                var y = d3.scale.linear()
+                        .range([height, 0]);
+
+                var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom")
+                        .tickFormat("");
+
+                var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left");
+
+                var svg = d3.select(this.$.chart)
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                x.domain(this.rawdata.map(function(obj){    return obj.id;}));
+                y.domain([0, d3.max(this.rawdata, function(obj){    return obj.average;})]);
+
+                svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis);
+
+                var fireFn = this.asyncFire.bind(this)
+
+                svg.selectAll(".bar")
+                        .data(this.rawdata)
+                        .enter().append("rect")
+                        .attr("id", function(d){
+                            return "b" + d.id;
+                        })
+                        .attr("class", "bar")
+                        .attr("x", function(d) { return x(d.id); })
+                        .attr("width", x.rangeBand())
+                        .attr("y", function(d) { return y(d.average); })
+                        .attr("height", function(d) { return height - y(d.average); })
+                        .style("fill", function(d) {return d.color;})
+                        .on('click', function(e) {
+//                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
+                        });
+
+            },
+            rawdataChanged: function(o, n){
+                if (n && n.length > 0){
+                    this.redraw();
+                }
+            }
+        });
+    </script>
+</polymer-element>

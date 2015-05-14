@@ -363,6 +363,7 @@
                     var data = [];
                     var budget = 0;
                     var affAbility = 0;
+                    var average = 0;
 
                     var changed = "|";
                     for (var scenario = 0; scenario < this.scenNumber; scenario++) {
@@ -389,6 +390,8 @@
                             obj.prob *= prob;
                         }
 
+                        average += - -(obj.impact*obj.prob);
+
                         obj.weight = Math.pow(obj.impact, 5)*obj.prob;
                         data.push(obj);
                     }
@@ -404,7 +407,7 @@
                         if (ep == 1) affAbility -= -(this.variants[factor].affAbility || 0);
                     }
 
-                    arr.push({data: data, budget: budget, affAbility:affAbility, id: bud});
+                    arr.push({data: data, budget: budget, affAbility:affAbility, id: bud, average: average});
                 }
 
                 this.rawdata = arr;
