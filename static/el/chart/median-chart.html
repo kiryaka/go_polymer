@@ -1,5 +1,5 @@
 
-<polymer-element name="median-chart" attributes="rawdata">
+<polymer-element name="median-chart" attributes="rawdata variants">
     <template>
         <style shim-shadowdom>
 
@@ -31,13 +31,22 @@
             .pline {
                 fill: none;
                 stroke: green;
-                stroke-width: 1.5px;
+                stroke-width: 2px;
             }
 
             .nline {
                 fill: none;
                 stroke: red;
-                stroke-width: 1.5px;
+                stroke-width: 2px;
+            }
+
+            .initial{
+
+            }
+
+            .budget{
+                opacity: 0.3;
+                stroke-width: 1px;
             }
 
             .pcircle {
@@ -64,8 +73,8 @@
             },
             redraw: function(){
                 var margin = {top: 20, right: 30, bottom: 30, left: 40},
-                        width = 800 - margin.left - margin.right,
-                        height = 400 - margin.top - margin.bottom;
+                        width = 700 - margin.left - margin.right,
+                        height = 700 - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
                         .range([0, width]);
@@ -80,12 +89,17 @@
 
                 var yAxis = d3.svg.axis()
                         .scale(y)
-                        .orient("left");
+                        .orient("right")
+                        .ticks(40);
 
                 var line = d3.svg.line()
                         .interpolate(interpolateSankey)
-                        .x(function(d) { return x(d.x); })
-                        .y(function(d) { return y(d.y); });
+                        .x(function(d) {
+                            return x(d.x);
+                        })
+                        .y(function(d) {
+                            return y(d.y);
+                        });
 
                 var svg = d3.select(this.$.map).append("svg")
                         .attr("width", width + margin.left + margin.right)
@@ -93,8 +107,7 @@
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                var dom = this.positive.concat(this.negative);
-                console.log(dom);
+                var dom = this.positive[0].data.concat(this.negative[0].data);
                 x.domain(d3.extent(dom, function(d) { return d.x; })).nice();
                 y.domain(d3.extent(dom, function(d) { return d.y; })).nice();
 
@@ -106,6 +119,7 @@
 
                 svg.append("g")
                         .attr("class", "y axis")
+                        .attr("transform", "translate(" + x(1) + ", 0)")
                         .call(yAxis);
 
                 var numberOfTicks = 10;
@@ -130,32 +144,63 @@
                         .classed('grid', true)
                         .call(xAxisGrid);
 
-                svg.append("path")
-                        .datum(this.positive)
-                        .attr("class", "pline")
-                        .attr("d", line);
+                var c20 = d3.scale.category20();
+                for (var i = 0; i < this.positive.length; i++) {
 
-                svg.append("g").selectAll("circle")
-                        .data(this.positive.filter(clasterize))
-                        .enter().append("circle") // <-C
-                        .attr("class", "pcircle")
-                        .attr("cx", function(d) { return x(d.x); })
-                        .attr("cy", function(d) { return y(d.y); })
-                        .attr("r", 2);
+                    var inClass = i == 0 ? " initial" : " budget";
+
+                    var data = this.positive[i];
+
+                    var p = svg.append("path")
+                            .datum(data.data)
+                            .attr("class", "pline" + inClass)
+                            .attr("d", line)
+                            .attr("id", "b" + data.id);
+
+                    var g = svg.append("g").datum(data.data)
+                            .attr("transform", function(d) {
+                                return "translate(" + (x(0) - 70) +"," + ( i*10 ) + ")";
+                            });
+                    g.append('rect')
+                            .attr("width", 70)
+                            .attr("height", 8)
+                            .style("fill", c20(data.id));
+//                    g.append('text')
+//                            .attr("x", 20)
+//                            .attr("y", 30)
+//                            .attr("dy", ".35em")
+//                            .text("haha");
+
+                    if (i > 0 ) p.style("stroke", c20(data.id));
 
 
-                svg.append("path")
-                        .datum(this.negative)
-                        .attr("class", "nline")
-                        .attr("d", line);
+                    data = this.negative[i]
+                    var n = svg.append("path")
+                            .datum(data.data)
+                            .attr("class", "nline" + inClass)
+                            .attr("d", line)
+                            .style("stroke", data.color)
+                            .attr("id", "b" + data.id);
 
-                svg.append("g").selectAll("circle")
-                        .data(this.negative.filter(clasterize))
-                        .enter().append("circle") // <-C
-                        .attr("class", "ncircle")
-                        .attr("cx", function(d) { return x(d.x); })
-                        .attr("cy", function(d) { return y(d.y); })
-                        .attr("r", 2);
+                    if (i > 0 ) n.style("stroke", c20(data.id));
+
+                }
+
+                function onmouseover(d){
+                    var svg = d3.select(this.ownerSVGElement);
+                    svg.selectAll("#" + this.id)
+                            .style("fill", "red")
+                            .style("stroke", "blue");
+
+                }
+
+                function onmouseout(d){
+                    var svg = d3.select(this.ownerSVGElement);
+                    svg.selectAll("#" + this.id)
+                            .style("fill", "none")
+                            .style("stroke", "green");
+
+                }
 
                 function clasterize(d, i, a ){
                     if ( i == 0 ) return true;
@@ -177,22 +222,27 @@
 
             },
             processData: function(){
-                this.impMax = d3.max(this.rawdata, function(d){return d.impact});
-                this.impMin = d3.min(this.rawdata, function(d){return d.impact});
-                this.positive = this.buildData(this.rawdata.sort(this.positiveSort.bind(this)));
-                this.negative = this.buildData(this.rawdata.sort(this.negativeSort.bind(this)));
+                this.positive = [];
+                this.negative = [];
+                var _this = this;
+                this.rawdata.forEach(function(d){
+                    _this.impMax = d3.max(d.data, function(d){return d.impact});
+                    _this.impMin = d3.min(d.data, function(d){return d.impact});
+                    _this.positive.push(_this.buildData(d, d.data.sort(_this.positiveSort.bind(_this))));
+                    _this.negative.push(_this.buildData(d, d.data.sort(_this.negativeSort.bind(_this))));
+                });
             },
             positiveSort: function(a,b){
                 if (a.impact == this.impMax) return -1;
                 if (b.impact == this.impMax) return 1;
-                return d3.descending(a.weight.median, b.weight.median);
+                return d3.descending(a.weight, b.weight);
             },
             negativeSort: function(a,b){
                 if (a.impact == this.impMin) return -1;
                 if (b.impact == this.impMin) return 1;
-                return d3.ascending(a.weight.median, b.weight.median);
+                return d3.ascending(a.weight, b.weight);
             },
-            buildData: function(arr){
+            buildData: function(data, arr){
                 var result = [];
                 var prob = [], imp = [], probSum = 0;
                 for(var i = 0; i < arr.length; i++){
@@ -201,18 +251,75 @@
                     imp.push(arr[i].impact);
 
                     var median = imp.reduce(function(previousValue, currentValue, index) {
-                        return previousValue + currentValue*prob[index]/probSum;
+                        return previousValue + ( probSum || 0 > 0 ? currentValue*prob[index]/probSum : 0);
                     }, 0);
 
-                    result.push({x: probSum, y: median});
+                    result.push({x: probSum > 1 ? 1 : probSum , y: median});
                 }
-                return result;
+                return {data:result, id: data.id, budget: data.budget};
             },
             rawdataChanged: function(o, n){
                 if (n && n.length > 0){
                     this.processData();
                     this.redraw();
                 }
+            },
+            variantsChanged: function(o, n){
+                if (n.length == 0) return;
+
+                var arr = [];
+                var processed = d3.set([]);
+
+                this.scenNumber = Math.pow(2, this.variants.length)
+
+                for (var bud = 0; bud < this.scenNumber; bud++) {
+
+                    var data = [];
+                    var budget = 0;
+
+                    var changed = "|";
+                    for (var scenario = 0; scenario < this.scenNumber; scenario++) {
+                        var obj = {id: scenario, prob: 1, impact: 0, color: "", endpoints: []}
+                        for (var factor = 0; factor < this.variants.length; factor++) {
+                            var ep = (scenario & (1 << factor ) ) > 0 ? 1 : 0
+                            var prob = - -this.variants[factor].endpoints[ep].prob;
+
+                            var diff = 0;
+
+                            if ((bud & (1 << factor ) ) > 0){
+                                diff = (this.variants[factor].probDiff || 0);
+                                if (ep == 0){
+                                    prob -= -diff;
+                                }else{
+                                    prob += -diff;
+                                }
+                            }
+                            changed += (diff > 0) ? "1" : "0";
+
+                            obj.endpoints.push(ep)
+
+                            obj.impact -= -this.variants[factor].endpoints[ep].impact;
+                            obj.prob *= prob;
+                        }
+
+                        obj.weight = Math.pow(obj.impact, 5)*obj.prob;
+                        data.push(obj);
+                    }
+
+
+                    if (processed.has(changed)) continue;
+
+                    processed.add(changed);
+
+                    for (var factor = 0; factor < this.variants.length; factor++) {
+                        var ep = (bud & (1 << factor ) ) > 0 ? 1 : 0
+                        if (ep == 1) budget -= -(this.variants[factor].cost || 0);
+                    }
+
+                    arr.push({data: data, budget: budget, id: bud});
+                }
+
+                this.rawdata = arr;
             }
         });
     </script>

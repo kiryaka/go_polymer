@@ -34,7 +34,7 @@
             obj.weight['linear'] = obj.normImpact*obj.normProb/100;
             obj.weight['safe'] = obj.normImpact*obj.normProb*obj.normProb/10000;
             obj.weight['aggressive'] = Math.abs(obj.normImpact)*obj.normImpact*obj.normProb/10000;
-            obj.weight['median'] = Math.pow(obj.normImpact, 5)*obj.normProb;
+            obj.weight['median'] = Math.pow(obj.impact, 5)*obj.prob;
 
             return obj;
         },

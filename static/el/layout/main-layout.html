@@ -20,7 +20,7 @@
 <link rel="import" href="/app-globals.html">
 <link rel="import" href="/el/layout/two-fixed.html">
 
-<polymer-element name="main-layout" attributes="rawdata">
+<polymer-element name="main-layout">
     <template>
         <style shim-shadowdom>
             core-header-panel {
@@ -91,7 +91,7 @@
 
                 <div horizontal layout flex>
 
-                    <paper-tabs id="tabs" selected="0" on-core-select="{{tabChanged}}">
+                    <paper-tabs id="tabs" selected="1" on-core-select="{{tabChanged}}">
                         <paper-tab>Dashboard</paper-tab>
                         <paper-tab>Analysis</paper-tab>
                         <paper-tab>Database</paper-tab>
@@ -101,17 +101,16 @@
                 <paper-icon-button id="saveIcon" icon="save" on-tap="{{saveVariantSignal}}"></paper-icon-button>
             </core-toolbar>
 
-            <core-selector multi="false" selected="0" id="selector" target="{{$.main_container}}" itemsSelector="section" selectedAttribute="visible"></core-selector>
+            <core-selector multi="false" selected="1" id="selector" target="{{$.main_container}}" itemsSelector="section" selectedAttribute="visible"></core-selector>
 
             <paper-shadow z="1" id="main_container" fit>
                 <section>
-                    <variant-list show="all" rawdata="{{rawdata}}"/>
+                    <variant-list show="all" variants="{{variants}}"/>
                 </section>
                 <section>
                     <median-chart variants="{{variants}}" rawdata="{{rawdata}}"></median-chart>
                 </section>
                 <section>
-                    <median-chart variants="{{variants}}" rawdata="{{rawdata}}"></median-chart>
                 </section>
             </paper-shadow>
 

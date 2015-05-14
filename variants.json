@@ -16,8 +16,8 @@
     ],
     "visible": true,
     "new": false,
-    "cost": "1",
-    "probDiff": "7"
+    "cost": "12",
+    "probDiff": "0.2"
   },
   {
     "uid": 2,
@@ -36,8 +36,8 @@
     ],
     "visible": true,
     "new": false,
-    "cost": "2",
-    "probDiff": "8"
+    "cost": "45",
+    "probDiff": "0.1"
   },
   {
     "uid": 3,
@@ -56,8 +56,8 @@
     ],
     "visible": true,
     "new": false,
-    "cost": "3",
-    "probDiff": "9"
+    "cost": "30",
+    "probDiff": "0.2"
   },
   {
     "uid": 4,
@@ -76,8 +76,8 @@
     ],
     "visible": true,
     "new": false,
-    "cost": "4",
-    "probDiff": "0"
+    "cost": "45",
+    "probDiff": "0.4"
   },
   {
     "uid": 5,
@@ -96,8 +96,8 @@
     ],
     "visible": true,
     "new": false,
-    "cost": "5",
-    "probDiff": "9"
+    "cost": "120",
+    "probDiff": "0.5"
   },
   {
     "uid": 6,
@@ -116,7 +116,7 @@
     ],
     "visible": true,
     "new": false,
-    "cost": "6",
-    "probDiff": "8"
+    "cost": "16",
+    "probDiff": "0.05"
   }
 ]
