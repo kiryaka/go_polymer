@@ -28,6 +28,10 @@
                 opacity: 0.5;
             }
 
+            line {
+                pointer-events: none;
+            }
+
             .pline {
                 fill: none;
                 stroke: green;
@@ -59,6 +63,22 @@
                 stroke: red;
                 fill: white;
                 /*fill-opacity: .7;*/
+            }
+
+            .area.above {
+                fill: rgb(252,141,89);
+                opacity: 0.5;
+                visibility:hidden;
+            }
+
+            .area.below {
+                fill: rgb(145,207,96);
+                opacity: 0.7;
+                visibility:hidden;
+            }
+
+            .vis{
+                visibility:visible !important;
             }
 
         </style>
@@ -94,12 +114,8 @@
 
                 var line = d3.svg.line()
                         .interpolate(interpolateSankey)
-                        .x(function(d) {
-                            return x(d.x);
-                        })
-                        .y(function(d) {
-                            return y(d.y);
-                        });
+                        .x(function(d) { return x(d.x); })
+                        .y(function(d) { return y(d.y); });
 
                 var svg = d3.select(this.$.map).append("svg")
                         .attr("width", width + margin.left + margin.right)
@@ -145,60 +161,124 @@
                         .call(xAxisGrid);
 
                 var c20 = d3.scale.category20();
-                for (var i = 0; i < this.positive.length; i++) {
 
-                    var inClass = i == 0 ? " initial" : " budget";
+                var area = d3.svg.area()
+                        .interpolate(interpolateSankey)
+                        .x(function(d) { return x(d.x); })
+                        .y(function(d) { return y(d.y); });
+
+                for (var i = 0; i < this.positive.length; i++) {
 
                     var data = this.positive[i];
 
+                    var inClass = data.id == 0 ? " initial" : " budget";
+
+                    svg.datum(data.data);
+
                     var p = svg.append("path")
-                            .datum(data.data)
                             .attr("class", "pline" + inClass)
                             .attr("d", line)
                             .attr("id", "b" + data.id);
 
-                    var g = svg.append("g").datum(data.data)
+
+
+                    if ( data.id == 0){
+                        svg.append("clipPath")
+                                .attr("id", "clip-above-p")
+                                .append("path")
+                                .attr("d", area.y0(0));
+                    }
+                    if (data.id > 0 ) p.style("stroke", c20(data.id));
+
+
+                    data = this.negative[i]
+                    svg.datum(data.data);
+
+                    var n = svg.append("path")
+                            .attr("class", "nline" + inClass)
+                            .attr("d", line)
+                            .style("stroke", data.color)
+                            .attr("id", "b" + data.id);
+
+                    if (data.id > 0 ) n.style("stroke", c20(data.id));
+
+                    if ( data.id == 0){
+                        svg.append("clipPath")
+                                .attr("id", "clip-above-n")
+                                .append("path")
+                                .attr("d", area.y0(0));
+                    }
+
+
+                    var g = svg.append("g")
                             .attr("transform", function(d) {
-                                return "translate(" + (x(0) - 70) +"," + ( i*10 ) + ")";
+                                return "translate(" + (x(0) - 60) +"," + ( i*10 ) + ")";
                             });
+
                     g.append('rect')
-                            .attr("width", 70)
-                            .attr("height", 8)
-                            .style("fill", c20(data.id));
+                            .attr("width", 60)
+                            .attr("height", 9)
+                            .style("fill", c20(data.id))
+                            .style("stroke-width", "1px")
+                            .style("stroke", "white")
+                            .attr("id", "b" + data.id)
+                            .on("mouseenter", onmouseover)
+                            .on("mouseleave", onmouseout);
 //                    g.append('text')
 //                            .attr("x", 20)
 //                            .attr("y", 30)
 //                            .attr("dy", ".35em")
 //                            .text("haha");
 
-                    if (i > 0 ) p.style("stroke", c20(data.id));
-
-
-                    data = this.negative[i]
-                    var n = svg.append("path")
-                            .datum(data.data)
-                            .attr("class", "nline" + inClass)
-                            .attr("d", line)
-                            .style("stroke", data.color)
-                            .attr("id", "b" + data.id);
-
-                    if (i > 0 ) n.style("stroke", c20(data.id));
-
                 }
 
+
+
+                for (var i = 0; i < this.positive.length; i++) {
+
+                    var data = this.positive[i];
+                    svg.datum(data.data);
+                    svg.append("path")
+                            .attr("class", "area below")
+                            .attr("clip-path", "url(#clip-above-p)")
+                            .attr("d", area.y0(function (d) {
+                                return height;
+                            }))
+                            .attr("id", "b" + data.id + "area");
+
+
+                    data = this.negative[i];
+                    svg.datum(data.data);
+                    svg.append("path")
+                            .attr("class", "area above")
+                            .attr("clip-path", "url(#clip-above-n)")
+                            .attr("d", area.y0(function (d) {
+                                return height;
+                            }))
+                            .attr("id", "b" + data.id + "area");
+                }
+
+
+
                 function onmouseover(d){
+                    if (this.id == "b0") return;
                     var svg = d3.select(this.ownerSVGElement);
-                    svg.selectAll("#" + this.id)
-                            .style("fill", "red")
-                            .style("stroke", "blue");
+                    svg.selectAll("path#" + this.id)
+                            .style("opacity", 1)
+                            .style("stroke-width", "2px");
+                    svg.selectAll("path#" + this.id + "area")
+                            .classed("vis", true);
 
                 }
 
                 function onmouseout(d){
+                    if (this.id == "b0") return;
                     var svg = d3.select(this.ownerSVGElement);
-                    svg.selectAll("#" + this.id)
-                            .style("fill", "none")
-                            .style("stroke", "green");
+                    svg.selectAll("path#" + this.id)
+                            .style("opacity", 0.3)
+                            .style("stroke-width", "1px");
+                    svg.selectAll("path#" + this.id + "area")
+                            .classed("vis", false);
 
                 }
 
@@ -231,6 +311,8 @@
                     _this.positive.push(_this.buildData(d, d.data.sort(_this.positiveSort.bind(_this))));
                     _this.negative.push(_this.buildData(d, d.data.sort(_this.negativeSort.bind(_this))));
                 });
+                this.positive.sort(function(a,b){return d3.descending(a.average, b.average);});
+                this.negative.sort(function(a,b){return d3.descending(a.average, b.average);});
             },
             positiveSort: function(a,b){
                 if (a.impact == this.impMax) return -1;
@@ -256,7 +338,8 @@
 
                     result.push({x: probSum > 1 ? 1 : probSum , y: median});
                 }
-                return {data:result, id: data.id, budget: data.budget};
+                result[0].x = 0;
+                return {data:result, id: data.id, budget: data.budget, average: result[result.length - 1].y};
             },
             rawdataChanged: function(o, n){
                 if (n && n.length > 0){
