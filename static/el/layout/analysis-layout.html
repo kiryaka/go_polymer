@@ -1,0 +1,32 @@
+
+<link rel="import" href="/el/chart/median-chart.html">
+<link rel="import" href="/el/chart/scatter-brush-chart.html">
+<link rel="import" href="/el/card/forecast-card.html">
+<polymer-element name="analysis-layout" attributes="rawdata variants">
+    <template>
+        <style shim-shadowdom>
+            :host{
+                display: block;
+                padding: 8px;
+            }
+        </style>
+
+        <div layout horizontal>
+            <median-chart variants="{{variants}}" rawdata="{{rawdata}}" flex ten></median-chart>
+            <div flex eight layout vertical style="margin-left: 10px; ">
+                <forecast-card variants="{{variants}}"></forecast-card>
+                <scatter-brush-chart variants="{{variants}}" rawdata="{{rawdata}}"></scatter-brush-chart>
+            </div>
+
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            dataSet: [],
+            ready: function(){
+
+            }
+        });
+    </script>
+</polymer-element>

@@ -18,7 +18,7 @@
 
 <link rel="import" href="/variant-list.html">
 <link rel="import" href="/app-globals.html">
-<link rel="import" href="/el/layout/two-fixed.html">
+<link rel="import" href="/el/layout/analysis-layout.html">
 
 <polymer-element name="main-layout">
     <template>
@@ -101,14 +101,14 @@
                 <paper-icon-button id="saveIcon" icon="save" on-tap="{{saveVariantSignal}}"></paper-icon-button>
             </core-toolbar>
 
-            <core-selector multi="false" selected="1" id="selector" target="{{$.main_container}}" itemsSelector="section" selectedAttribute="visible"></core-selector>
+            <core-selector multi="false" selected="1" id="selector" target="{{$.main_container}}" on-core-select="{{sectionChanged}}" itemsSelector="section" selectedAttribute="visible"></core-selector>
 
             <paper-shadow z="1" id="main_container" fit>
                 <section>
                     <variant-list show="all" variants="{{variants}}"/>
                 </section>
                 <section>
-                    <median-chart variants="{{variants}}" rawdata="{{rawdata}}"></median-chart>
+                    <analysis-layout variants="{{variants}}" rawdata="{{rawdata}}" fit></analysis-layout>
                 </section>
                 <section>
                 </section>
@@ -131,6 +131,20 @@
             },
             saveVariantSignal: function(event, detail, sender){
                 this.asyncFire('core-signal', {name: "foo", data: "Foo!"});
+            },
+            sectionChanged: function(e){
+                if (e.detail.isSelected){
+                    var list = e.detail.item.querySelectorAll("* /deep/ .initable");
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i]["tearDown"]) list[i]["tearDown"]();
+                    }
+
+                }else{
+                    var list = e.detail.item.querySelectorAll("* /deep/ .initable");
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i]["wakeUp"]) list[i]["wakeUp"]();
+                    }
+                }
             }
         });
     </script>

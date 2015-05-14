@@ -1,0 +1,56 @@
+
+<polymer-element name="forecast-card" attributes="rawdata variants">
+    <template>
+        <style shim-shadowdom>
+            :host{
+                display: block;
+                font-size: 0.8rem;
+            }
+
+            .headers{
+                font-weight: 500;
+                border-bottom: solid 1px #666;
+                text-align: center;
+            }
+
+            .container{
+                border: solid 1px #666;
+            }
+
+            .container>div>div{
+                padding: 3px 10px;
+                border-right: solid 1px #666;
+                border-bottom: solid 1px #eee;
+            }
+
+            .container>div>div:last-of-type{
+                border-right: none;
+            }
+
+        </style>
+        <div layout vertical class="container">
+            <div layout horizontal class="headers">
+                <div flex ten>Name</div>
+                <div flex one>Abil</div>
+                <div flex one>Diff</div>
+                <div flex one>Cost</div>
+            </div>
+            <template repeat="{{variant in variants}}">
+                <div layout horizontal>
+                    <div flex ten>{{variant.text}}</div>
+                    <div flex one>{{variant.affAbility}}</div>
+                    <div flex one>{{variant.probDiff}}</div>
+                    <div flex one>{{variant.cost}}</div>
+                </div>
+            </template>
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            ready: function(){
+
+            }
+        });
+    </script>
+</polymer-element>

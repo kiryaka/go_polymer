@@ -2,7 +2,9 @@
 <polymer-element name="median-chart" attributes="rawdata variants">
     <template>
         <style shim-shadowdom>
-
+            :host{
+                display: block;
+            }
             .axis path,
             .axis line {
                 fill: none;
@@ -92,9 +94,9 @@
 
             },
             redraw: function(){
-                var margin = {top: 20, right: 30, bottom: 30, left: 40},
-                        width = 700 - margin.left - margin.right,
-                        height = 700 - margin.top - margin.bottom;
+                var margin = {top: 5, right: 30, bottom: 30, left: 40},
+                        width = 640 - margin.left - margin.right,
+                        height = 640 - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
                         .range([0, width]);
@@ -209,15 +211,16 @@
                                 .attr("d", area.y0(0));
                     }
 
+                    var rh = Math.round(height/this.rawdata.length);
 
                     var g = svg.append("g")
                             .attr("transform", function(d) {
-                                return "translate(" + (x(0) - 60) +"," + ( i*10 ) + ")";
+                                return "translate(" + (x(0) - 60) +"," + ( i*rh) + ")";
                             });
 
                     g.append('rect')
                             .attr("width", 60)
-                            .attr("height", 9)
+                            .attr("height", rh)
                             .style("fill", c20(data.id))
                             .style("stroke-width", "1px")
                             .style("stroke", "white")
@@ -359,6 +362,7 @@
 
                     var data = [];
                     var budget = 0;
+                    var affAbility = 0;
 
                     var changed = "|";
                     for (var scenario = 0; scenario < this.scenNumber; scenario++) {
@@ -397,9 +401,10 @@
                     for (var factor = 0; factor < this.variants.length; factor++) {
                         var ep = (bud & (1 << factor ) ) > 0 ? 1 : 0
                         if (ep == 1) budget -= -(this.variants[factor].cost || 0);
+                        if (ep == 1) affAbility -= -(this.variants[factor].affAbility || 0);
                     }
 
-                    arr.push({data: data, budget: budget, id: bud});
+                    arr.push({data: data, budget: budget, affAbility:affAbility, id: bud});
                 }
 
                 this.rawdata = arr;

@@ -80,12 +80,13 @@
         <div class="variant_header" layout horizontal center>
 
             <div class="rowNum" layout center> {{variant.uid}} </div>
-            <core-field flex two class="variantInput" layout horizontal>
+            <core-field flex three  class="variantInput" layout horizontal>
                 <input is="core-input" placeholder="variant description" value="{{variant.text}}" flex ten>
-                <input is="core-input" class="intInput" placeholder="prob" value="{{variant.probDiff}}" flex one>
-                <input is="core-input" class="intInput" placeholder="cost" value="{{variant.cost}}" flex one>
+                <input is="core-input" class="intInput" placeholder="Aff. Abil" value="{{variant.affAbility}}" flex one>
+                <input is="core-input" class="intInput" placeholder="P. Diff" value="{{variant.probDiff}}" flex one>
+                <input is="core-input" class="intInput" placeholder="Cost" value="{{variant.cost}}" flex one>
             </core-field>
-            <div vertical layout class="endpoints" flex three>
+            <div vertical layout class="endpoints" flex four >
                 <template repeat="{{endpoint, index in variant.endpoints}}" id="eps">
                     <div layout horizontal center>
                         <core-field flex class="endpoint {{endpoint.selectedClass}}">
