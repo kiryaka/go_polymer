@@ -51,8 +51,8 @@
             }
 
             .budget{
-                opacity: 0.3;
-                stroke-width: 1px;
+                opacity: 1;
+                stroke-width: 0.5px;
             }
 
             .pcircle {
@@ -83,9 +83,15 @@
                 visibility:visible !important;
             }
 
-        </style>
+            .grayed {
+                /*stroke: #ccc !important;*/
+                visibility: hidden !important;
+            }
 
+
+        </style>
         <svg id="chart"></svg>
+        <core-signals on-core-signal-select-group="{{selectGroup}}"></core-signals>
     </template>
 
     <script>
@@ -125,6 +131,8 @@
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                this.svg = svg;
 
                 var dom = this.positive[0].data.concat(this.negative[0].data);
                 x.domain(d3.extent(dom, function(d) { return d.x; })).nice();
@@ -181,8 +189,8 @@
                     var p = svg.append("path")
                             .attr("class", "pline" + inClass)
                             .attr("d", line)
-                            .on("mouseenter", onmouseover)
-                            .on("mouseleave", onmouseout)
+//                            .on("mouseenter", onmouseover)
+//                            .on("mouseleave", onmouseout)
                             .attr("id", "b" + data.id);
 
 
@@ -354,6 +362,7 @@
                 }
             },
             rebuildVariants: function(){
+
                 var arr = [];
                 var processed = d3.set([]);
 
@@ -432,8 +441,21 @@
 
                 this.rawdata = arr.sort(function(a,b){return d3.descending(a.average, b.average);});
             },
+            variantsChanged: function(o, n){
+                if (this.visible === "" && n.length > 0) this.rebuildVariants();
+            },
             visibleChanged: function(o, n){
-                if (n === "") this.rebuildVariants();
+                if (n === "" && this.variants && this.variants.length > 0) this.rebuildVariants();
+            },
+            selectGroup: function(e){
+                if (!this.svg) return;
+                this.svg.selectAll("path.budget").classed("grayed", function(d){
+                    return !e.detail[this.id];
+                });
+
+                this.svg.selectAll("rect").classed("grayed", function(d){
+                    return !e.detail[this.id];
+                });
             }
 
         });
