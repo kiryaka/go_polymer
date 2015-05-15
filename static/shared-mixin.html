@@ -65,11 +65,7 @@
 
             var el = this;
             this.dataSet.map(function(d){ return el.calculateWeights(d, iScale, pScale)})
-        },
-        numchanged: function(e, detail, sender) {
-            d3.select(this.$.chart).selectAll("*").remove();
-            this.redraw()
-            this.switchSelected(d3.select(this.$.chart).selectAll("#name_" + detail.join("")))
+            this.rawdata = this.dataSet.slice();
         },
         switchSelected: function(el){
             if (typeof this.currentBar !== "undefined") {
@@ -80,7 +76,7 @@
         },
         variantsChanged: function(oldVal, newVal) {
             if (newVal.length == 0) return;
-            this.redraw()
+            this.rebuildDataSet()
         },
         showsc: function(e, detail, sender) {
             this.switchSelected(d3.select(this.$.chart).selectAll("#name_" + detail.join("")))

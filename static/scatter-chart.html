@@ -1,7 +1,7 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 
 
-<polymer-element name="scatter-chart" attributes="variants chartHeight rawdata">
+<polymer-element name="scatter-chart" attributes="variants chartHeight rawdata visible">
     <template>
         <style>
             :host {
@@ -45,14 +45,23 @@
             },
             ready: function(){
             },
+            numchanged: function(e, detail, sender) {
+                this.rebuildDataSet()
+                this.switchSelected(d3.select(this.$.chart).selectAll("#name_" + detail.join("")))
+            },
+            rawdataChanged: function(o, n){
+                if (n && n.length > 0 && this.visible === "") this.redraw();
+            },
+            visibleChanged: function(o, n){
+                if (n === "" && this.rawdata && this.rawdata.length > 0) this.redraw();
+            },
             redraw: function(){
-                this.rebuildDataSet();
-                this.rawdata = this.dataSet.slice();
+                d3.select(this.$.chart).selectAll("*").remove();
                 this.updateColors("impact");
 
                 var margin = {top: 20, right: 20, bottom: 30, left: 40},
                         width = this.getBoundingClientRect().width - margin.left - margin.right,
-                        height = this.chartHeight - margin.top - margin.bottom;
+                        height = this.getBoundingClientRect().height - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
                         .range([0, width]);
@@ -84,7 +93,7 @@
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                var data = this.dataSet
+                var data = this.rawdata
 
 
                 x.domain(d3.extent(data, function(d) {

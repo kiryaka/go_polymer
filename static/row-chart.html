@@ -2,113 +2,119 @@
 <link rel="import" href="shared-mixin.html">
 
 
-<polymer-element name="row-chart" attributes="variants chartHeight">
-  <template>
-    <style>
-      :host {
-        display: block;
-        position: relative;
-        background-color: white;
-        width: 100%;
-      }
-      .axis path,
-      .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-      }
+<polymer-element name="row-chart" attributes="rawdata chartHeight visible">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: relative;
+                background-color: white;
+                width: 100%;
+            }
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
 
-      text {
-          font-size: 10px;
-      }
+            text {
+                font-size: 10px;
+            }
 
 
-    </style>
-    <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
-    <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
-    <svg id="chart"></svg>
+        </style>
+        <core-signals on-core-signal-numchanged="{{numchanged}}"></core-signals>
+        <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
+        <svg id="chart"></svg>
 
-  </template>
-  <script>
-    Polymer(Polymer.mixin({
-      created: function() {
-        // hint that items is an array
-        this.scenNumber = 0;
-        this.variants = [];
-        this.dataSet = [];
-      },
-      costFunction: function(prob, impact){
-        return prob;
-      },
-      ready: function(){
+    </template>
+    <script>
+        Polymer(Polymer.mixin({
+            created: function() {
+                // hint that items is an array
+                this.scenNumber = 0;
+                this.variants = [];
+                this.dataSet = [];
+            },
+            costFunction: function(prob, impact){
+                return prob;
+            },
+            ready: function(){
 
-      },
-      redraw: function(){
-        this.rebuildDataSet();
-        this.updateColors("impact");
+            },
+            rawdataChanged: function(o, n){
+                if (n && n.length > 0 && this.visible === "") this.redraw();
+            },
+            visibleChanged: function(o, n){
+                if (n === "" && this.rawdata && this.rawdata.length > 0) this.redraw();
+            },
+            redraw: function(){
+                d3.select(this.$.chart).selectAll("*").remove();
+                this.updateColors("impact");
+                this.dataSet = this.rawdata;
+                this.dataSet = this.dataSet.filter(function(d){return d.prob > 0.005;})
+                this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
 
-        this.dataSet = this.dataSet.filter(function(d){return d.prob > 0.005;})
-        this.dataSet.sort(function(a,b){return d3.descending(a.prob, b.prob);})
+                var margin = {top: 20, right: 20, bottom: 30, left: 40},
+                        width = this.getBoundingClientRect().width - margin.left - margin.right,
+                        height = this.getBoundingClientRect().height - margin.top - margin.bottom;
 
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-                width = this.getBoundingClientRect().width - margin.left - margin.right,
-                height = this.chartHeight - margin.top - margin.bottom;
+                var formatPercent = d3.format(".0%");
 
-        var formatPercent = d3.format(".0%");
+                var x = d3.scale.ordinal()
+                        .rangeRoundBands([0, width], .1);
 
-        var x = d3.scale.ordinal()
-                .rangeRoundBands([0, width], .1);
+                var y = d3.scale.linear()
+                        .range([height, 0]);
 
-        var y = d3.scale.linear()
-                .range([height, 0]);
+                var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom")
+                        .tickFormat("");
 
-        var xAxis = d3.svg.axis()
-                .scale(x)
-                .orient("bottom")
-                .tickFormat("");
+                var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+                        .tickFormat(formatPercent);
 
-        var yAxis = d3.svg.axis()
-                .scale(y)
-                .orient("left")
-                .tickFormat(formatPercent);
+                var svg = d3.select(this.$.chart)
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var svg = d3.select(this.$.chart)
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                x.domain(this.dataSet.map(function(obj){    return obj.id;}));
+                y.domain([0, d3.max(this.dataSet, function(obj){    return obj.prob;})]);
 
-        x.domain(this.dataSet.map(function(obj){    return obj.id;}));
-        y.domain([0, d3.max(this.dataSet, function(obj){    return obj.prob;})]);
+                svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
 
-        svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis);
 
-        svg.append("g")
-                .attr("class", "y axis")
-                .call(yAxis);
+                var fireFn = this.asyncFire.bind(this)
 
-        var fireFn = this.asyncFire.bind(this)
+                svg.selectAll(".bar")
+                        .data(this.dataSet)
+                        .enter().append("rect")
+                        .attr("id", function(d){
+                            return "name_" + d.endpoints.join("");
+                        })
+                        .attr("class", "bar")
+                        .attr("x", function(d) { return x(d.id); })
+                        .attr("width", x.rangeBand())
+                        .attr("y", function(d) { return y(d.prob); })
+                        .attr("height", function(d) { return height - y(d.prob); })
+                        .style("fill", function(d) {return d.color;})
+                        .on('click', function(e) {
+                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
+                        });
 
-        svg.selectAll(".bar")
-                .data(this.dataSet)
-                .enter().append("rect")
-                .attr("id", function(d){
-                  return "name_" + d.endpoints.join("");
-                })
-                .attr("class", "bar")
-                .attr("x", function(d) { return x(d.id); })
-                .attr("width", x.rangeBand())
-                .attr("y", function(d) { return y(d.prob); })
-                .attr("height", function(d) { return height - y(d.prob); })
-                .style("fill", function(d) {return d.color;})
-                .on('click', function(e) {
-                  fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
-                });
-
-      }
-    }, window.sharedChartMixin));
-  </script>
+            }
+        }, window.sharedChartMixin));
+    </script>
 </polymer-element>

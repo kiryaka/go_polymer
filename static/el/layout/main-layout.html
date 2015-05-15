@@ -75,12 +75,22 @@
                 background-color: #b7e1cd;
             }
 
-            #main_container section {
+            #main_container * {
                 display: none;
             }
 
-            #main_container section[visible]{
+            #main_container *[visible]{
                 display: block !important;
+            }
+
+            * /deep/ .nouserselect {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                -moz-user-select: -moz-none;
             }
 
         </style>
@@ -91,7 +101,7 @@
 
                 <div horizontal layout flex>
 
-                    <paper-tabs id="tabs" selected="1" on-core-select="{{tabChanged}}">
+                    <paper-tabs id="tabs" selected="0" on-core-select="{{tabChanged}}">
                         <paper-tab>Dashboard</paper-tab>
                         <paper-tab>Analysis</paper-tab>
                         <paper-tab>Database</paper-tab>
@@ -101,17 +111,11 @@
                 <paper-icon-button id="saveIcon" icon="save" on-tap="{{saveVariantSignal}}"></paper-icon-button>
             </core-toolbar>
 
-            <core-selector multi="false" selected="1" id="selector" target="{{$.main_container}}" on-core-select="{{sectionChanged}}" itemsSelector="section" selectedAttribute="visible"></core-selector>
+            <core-selector multi="false" id="selector" target="{{$.main_container}}" on-core-select="{{sectionChanged}}" itemsSelector="*" selectedAttribute="visible"></core-selector>
 
             <paper-shadow z="1" id="main_container" fit>
-                <section>
-                    <variant-list show="all" variants="{{variants}}"/>
-                </section>
-                <section>
-                    <analysis-layout variants="{{variants}}" rawdata="{{rawdata}}" fit></analysis-layout>
-                </section>
-                <section>
-                </section>
+                <variant-list show="all" variants="{{variants}}"></variant-list>
+                <analysis-layout variants="{{variants}}" rawdata="{{rawdata}}" fit></analysis-layout>
             </paper-shadow>
 
         </core-header-panel>

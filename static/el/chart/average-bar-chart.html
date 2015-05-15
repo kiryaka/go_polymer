@@ -1,12 +1,11 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 
-<polymer-element name="average-bar-chart" attributes="rawdata">
+<polymer-element name="average-bar-chart" attributes="rawdata visible">
     <template>
         <style>
             :host {
                 display: block;
                 position: relative;
-                background-color: white;
                 width: 100%;
             }
             .axis path,
@@ -20,10 +19,15 @@
                 font-size: 10px;
             }
 
+            .grayed {
+                fill: #888 !important;
+                fill-opacity: 1;
+            }
+
 
         </style>
         <svg id="chart"></svg>
-
+        <core-signals on-core-signal-select-group="{{selectGroup}}"></core-signals>
     </template>
     <script>
         Polymer({
@@ -31,11 +35,13 @@
             ready: function(){
 
             },
+            processData: function(){
+            },
             redraw: function(){
-
-                var margin = {top: 20, right: 20, bottom: 30, left: 40},
-                        width = this.getBoundingClientRect().width - margin.left - margin.right,
-                        height = 200 - margin.top - margin.bottom;
+                d3.select(this.$.chart).selectAll("*").remove();
+                var margin = {top:10, right: 10, bottom: 20, left: 20},
+                        width = this.parentElement.getBoundingClientRect().width - margin.left - margin.right,
+                        height = this.parentElement.getBoundingClientRect().height/4 - margin.top - margin.bottom;
 
                 var formatPercent = d3.format(".0%");
 
@@ -90,11 +96,23 @@
 //                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
                         });
 
+                this.svg = svg;
+
             },
             rawdataChanged: function(o, n){
                 if (n && n.length > 0){
-                    this.redraw();
+                    this.processData();
+                    if (this.visible === "") this.redraw();
                 }
+            },
+            visibleChanged: function(o, n){
+                if (n === "" && this.rawdata && this.rawdata.length > 0) this.redraw();
+            },
+            selectGroup: function(e){
+                if (!this.svg) return;
+                this.svg.selectAll(".bar").classed("grayed", function(d){
+                    return !e.detail[this.id];
+                });
             }
         });
     </script>

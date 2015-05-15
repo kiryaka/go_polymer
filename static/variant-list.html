@@ -6,58 +6,62 @@
 <link rel="import" href="scatter-chart.html">
 <link rel="import" href="weight-chart.html">
 
-<polymer-element name="variant-list" attributes="show variants">
-  <template variants="{{variants}}">
-    <style>
-      :host {
-        display: block;
-        width: 100%;
-        margin: auto;
-      }
+<polymer-element name="variant-list" attributes="show variants visible">
+    <template variants="{{variants}}">
+        <style>
+            :host {
+                display: block;
+                width: 100%;
+                margin: auto;
+            }
 
-    </style>
+        </style>
 
-    <variant-service id="service" variants="{{variants}}"></variant-service>
+        <variant-service id="service" variants="{{variants}}"></variant-service>
 
-    <div layout vertical center>
-      <template repeat="{{variant in variants}}">
-        <variant-row variant="{{variant}}"/>
-      </template>
-    </div>
+        <div layout vertical fit>
 
-    <core-xhr id="xhr" method="POST"></core-xhr>
-    <core-signals on-core-signal-foo="{{fooSignal}}"></core-signals>
+            <div layout vertical center>
+                <template repeat="{{variant in variants}}">
+                    <variant-row variant="{{variant}}"/>
+                </template>
+            </div>
 
-    <div layout vertical>
-      <div layout horizontal>
-        <scatter-chart variants="{{variants}}" rawdata="{{rawdata}}" chartHeight="200"  flex three></scatter-chart>
-        <row-chart variants="{{variants}}" chartHeight="200" flex four></row-chart>
-      </div>
-      <div layout horizontal>
-        <weight-chart rawdata="{{rawdata}}" chartHeight="200" weightFn="linear"></weight-chart>
-        <weight-chart rawdata="{{rawdata}}" chartHeight="200" weightFn="aggressive"></weight-chart>
-        <weight-chart rawdata="{{rawdata}}" chartHeight="200" weightFn="safe"></weight-chart>
-      </div>
-    </div>
+            <core-xhr id="xhr" method="POST"></core-xhr>
+            <core-signals on-core-signal-foo="{{fooSignal}}"></core-signals>
 
-  </template>
+            <div layout vertical flex >
+                <div layout horizontal flex>
+                    <scatter-chart variants="{{variants}}" rawdata="{{rawdata}}" visible="{{visible}}" flex three></scatter-chart>
+                    <row-chart rawdata="{{rawdata}}" visible="{{visible}}" flex four></row-chart>
+                </div>
+                <div layout horizontal flex>
+                    <weight-chart rawdata="{{rawdata}}" visible="{{visible}}" weightFn="linear"></weight-chart>
+                    <weight-chart rawdata="{{rawdata}}" visible="{{visible}}" weightFn="aggressive"></weight-chart>
+                    <weight-chart rawdata="{{rawdata}}" visible="{{visible}}" weightFn="safe"></weight-chart>
+                </div>
+            </div>
 
-  <script>
-    Polymer({
-      dataset: [],
-      created: function() {
-        // hint that items is an array
-        this.variants = [];
-      },
-      fooSignal: function(e, detail, sender) {
-        this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.variants, null, 2), method:"post"});
-      },
-      ready: function() {
+        </div>
 
-      },
-      variantsChanged: function(oldVal, newVal) {
-        if (newVal.length == 0) return;
-      }
-    });
-  </script>
+    </template>
+
+    <script>
+        Polymer({
+            dataset: [],
+            created: function() {
+                // hint that items is an array
+                this.variants = [];
+            },
+            fooSignal: function(e, detail, sender) {
+                this.$.xhr.request({url: "/api/saveVariants", body: JSON.stringify(this.variants, null, 2), method:"post"});
+            },
+            ready: function() {
+
+            },
+            variantsChanged: function(oldVal, newVal) {
+                if (newVal.length == 0) return;
+            }
+        });
+    </script>
 </polymer-element>

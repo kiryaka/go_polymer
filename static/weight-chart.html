@@ -2,13 +2,12 @@
 <link rel="import" href="shared-mixin.html">
 
 
-<polymer-element name="weight-chart" attributes="rawdata chartHeight weightFn">
+<polymer-element name="weight-chart" attributes="rawdata chartHeight weightFn visible">
     <template>
         <style>
             :host {
                 display: block;
                 position: relative;
-                background-color: white;
                 width: 100%;
             }
             .axis path,
@@ -22,7 +21,6 @@
                 font-size: 10px;
             }
         </style>
-        <crtre-signals on-core-signal-numchanged="{{numchanged}}"></crtre-signals>
         <core-signals on-core-signal-showsc="{{showsc}}"></core-signals>
         <svg id="chart"></svg>
 
@@ -42,10 +40,13 @@
 
             },
             rawdataChanged: function(o, n){
-                if (n && n.length > 0) this.redraw();
+                if (n && n.length > 0 && this.visible === "") this.redraw();
+            },
+            visibleChanged: function(o, n){
+                if (n === "" && this.rawdata && this.rawdata.length > 0) this.redraw();
             },
             redraw: function(){
-//                this.rebuildDataSet();
+                d3.select(this.$.chart).selectAll("*").remove();
                 this.dataSet = this.rawdata;
                 this.updateColors(this.weightFn);
                 var _this = this;
@@ -54,7 +55,7 @@
 
                 var margin = {top: 10, right: 10, bottom: 30, left: 40},
                         width = this.getBoundingClientRect().width - margin.left - margin.right,
-                        height = this.chartHeight - margin.top - margin.bottom;
+                        height = this.getBoundingClientRect().height - margin.top - margin.bottom;
 
                 var x = d3.scale.ordinal()
                         .rangeRoundBands([0, width], .1)

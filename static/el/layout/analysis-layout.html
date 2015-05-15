@@ -3,7 +3,7 @@
 <link rel="import" href="/el/chart/scatter-brush-chart.html">
 <link rel="import" href="/el/chart/average-bar-chart.html">
 <link rel="import" href="/el/card/forecast-card.html">
-<polymer-element name="analysis-layout" attributes="rawdata variants">
+<polymer-element name="analysis-layout" attributes="rawdata variants visible">
     <template>
         <style shim-shadowdom>
             :host{
@@ -12,12 +12,12 @@
             }
         </style>
 
-        <div layout horizontal>
-            <median-chart variants="{{variants}}" rawdata="{{rawdata}}" flex ten></median-chart>
-            <div flex eight layout vertical style="margin-left: 10px; ">
-                <forecast-card variants="{{variants}}"></forecast-card>
-                <scatter-brush-chart variants="{{variants}}" rawdata="{{rawdata}}"></scatter-brush-chart>
-                <average-bar-chart rawdata="{{rawdata}}"></average-bar-chart>
+        <div layout horizontal fit>
+            <median-chart variants="{{variants}}" rawdata="{{rawdata}}" visible="{{visible}}" flex ten></median-chart>
+            <div flex eight layout vertical>
+                <forecast-card variants="{{variants}}" visible="{{visible}}" flex two></forecast-card>
+                <scatter-brush-chart variants="{{variants}}" rawdata="{{rawdata}}" visible="{{visible}}" flex one></scatter-brush-chart>
+                <average-bar-chart rawdata="{{rawdata}}" visible="{{visible}}" flex one></average-bar-chart>
             </div>
 
         </div>

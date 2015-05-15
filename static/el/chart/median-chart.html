@@ -1,5 +1,5 @@
 
-<polymer-element name="median-chart" attributes="rawdata variants">
+<polymer-element name="median-chart" attributes="rawdata variants visible">
     <template>
         <style shim-shadowdom>
             :host{
@@ -85,7 +85,7 @@
 
         </style>
 
-        <div id="map"></div>
+        <svg id="chart"></svg>
     </template>
 
     <script>
@@ -94,9 +94,10 @@
 
             },
             redraw: function(){
-                var margin = {top: 5, right: 30, bottom: 30, left: 40},
-                        width = 640 - margin.left - margin.right,
-                        height = 640 - margin.top - margin.bottom;
+                d3.select(this.$.chart).selectAll("*").remove();
+                var margin = {top: 5, right: 40, bottom: 5, left: 40},
+                        width = this.getBoundingClientRect().width - margin.left - margin.right,
+                        height = this.getBoundingClientRect().height - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
                         .range([0, width]);
@@ -119,7 +120,7 @@
                         .x(function(d) { return x(d.x); })
                         .y(function(d) { return y(d.y); });
 
-                var svg = d3.select(this.$.map).append("svg")
+                var svg = d3.select(this.$.chart)
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
@@ -341,7 +342,7 @@
                         return previousValue + ( probSum || 0 > 0 ? currentValue*prob[index]/probSum : 0);
                     }, 0);
 
-                    result.push({x: probSum > 1 ? 1 : probSum , y: median});
+                    result.push({x: probSum > 1 ? 1 : (probSum < 0 ? 0 : probSum) , y: median});
                 }
                 result[0].x = 0;
                 return {data:result, id: data.id, budget: data.budget, average: result[result.length - 1].y};
@@ -349,16 +350,16 @@
             rawdataChanged: function(o, n){
                 if (n && n.length > 0){
                     this.processData();
-                    this.redraw();
+                    if (this.visible === "") this.redraw();
                 }
             },
-            variantsChanged: function(o, n){
-                if (n.length == 0) return;
-
+            rebuildVariants: function(){
                 var arr = [];
                 var processed = d3.set([]);
 
                 this.scenNumber = Math.pow(2, this.variants.length)
+
+                var zeroAverage = 0;
 
                 for (var bud = 0; bud < this.scenNumber; bud++) {
 
@@ -394,7 +395,8 @@
 
                         average += - -(obj.impact*obj.prob);
 
-                        obj.weight = Math.pow(obj.impact, 5)*obj.prob;
+//                        obj.weight = Math.pow(obj.impact, 5)*obj.prob;
+                        obj.weight = obj.impact;
                         data.push(obj);
                     }
 
@@ -409,11 +411,31 @@
                         if (ep == 1) affAbility -= -(this.variants[factor].affAbility || 0);
                     }
 
+                    if (bud == 0){
+                        zeroAverage = average;
+                        average = 0;
+                    }else{
+                        average = average - zeroAverage;
+                    }
+
+
                     arr.push({data: data, budget: budget, affAbility:affAbility, id: bud, average: average});
                 }
 
-                this.rawdata = arr;
+                var scale = d3.scale.linear().domain(d3.extent(arr, function(d){return d.average})).range([0,10]);
+                var color = d3.scale.linear()
+                        .domain([-2, 0,5,10])
+                        .range(colorbrewer.YlGn[4]);
+                arr.forEach(function(d){
+                    d.color = color(scale(d.average));
+                });
+
+                this.rawdata = arr.sort(function(a,b){return d3.descending(a.average, b.average);});
+            },
+            visibleChanged: function(o, n){
+                if (n === "") this.rebuildVariants();
             }
+
         });
     </script>
 </polymer-element>

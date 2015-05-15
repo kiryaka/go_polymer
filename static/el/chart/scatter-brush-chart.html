@@ -1,5 +1,5 @@
 
-<polymer-element name="scatter-brush-chart" attributes="rawdata variants">
+<polymer-element name="scatter-brush-chart" attributes="rawdata variants visible">
     <template>
         <style shim-shadowdom>
             :host{
@@ -35,14 +35,14 @@
             }
 
             .point {
-                fill: #999;
+                /*fill: #999;*/
                 stroke: #fff;
             }
 
-            .point.selected {
-                fill: red;
+            .point.grayed {
+                fill: #888 !important;
                 fill-opacity: 1;
-                stroke: brown;
+                /*stroke: brown;*/
             }
 
             .brush .extent {
@@ -54,7 +54,7 @@
 
         </style>
 
-        <div id="map"></div>
+        <svg id="chart" class="nouserselect"></svg>
     </template>
 
     <script>
@@ -63,18 +63,18 @@
 
             },
             redraw: function(){
-
-                var margin = {top: 20, right: 30, bottom: 30, left: 20},
-                        width = 550 - margin.left - margin.right,
-                        height = 200 - margin.top - margin.bottom;
+                d3.select(this.$.chart).selectAll("*").remove();
+                var margin = {top: 10, right: 10, bottom: 20, left: 20},
+                        width = this.parentElement.getBoundingClientRect().width - margin.left - margin.right,
+                        height = this.parentElement.getBoundingClientRect().height/4 - margin.top - margin.bottom;
 
 
                 var x = d3.scale.linear()
-                        .domain(d3.extent(this.rawdata, function(d) { return d.budget; })).nice()
+                        .domain([0, d3.max(this.rawdata, function(d) { return d.budget; })]).nice()
                         .range([0, width]);
 
                 var y = d3.scale.linear()
-                        .domain(d3.extent(this.rawdata, function(d) { return d.affAbility; })).nice()
+                        .domain([0, d3.max(this.rawdata, function(d) { return d.affAbility + d.affAbility/20; })]).nice()
                         .range([height, 0]);
 
                 var data = this.rawdata.map(function(d) { return [d.budget, d.affAbility]; });
@@ -98,52 +98,14 @@
                 var brush = d3.svg.brush()
                         .x(x)
                         .y(y)
-                        .on("brush", brushed)
-                        .on("brushend", brushended);
+                        .on("brush", brushed.bind(this))
+                        .on("brushend", brushended.bind(this));
 
-                var svg = d3.select(this.$.map).append("svg")
+                var svg = d3.select(this.$.chart)
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                var point = svg.selectAll(".point")
-                        .data(this.rawdata)
-                        .enter().append("circle")
-                        .attr("class", "point")
-                        .attr("cx", function(d) { return x(d.budget); })
-                        .attr("cy", function(d) { return y(d.affAbility); })
-                        .attr("r", 4);
-
-                svg.append("g")
-                        .attr("class", "brush")
-                        .call(brush)
-                        .call(brush.event);
-
-                function brushed() {
-                    var extent = brush.extent();
-                    point.each(function(d) { d.selected = false; });
-                    search(quadtree, extent[0][0], extent[0][1], extent[1][0], extent[1][1]);
-                    point.classed("selected", function(d) { return d.selected; });
-                }
-
-                function brushended() {
-                    if (!d3.event.sourceEvent) return; // only transition after input
-//                    d3.select(this).transition()
-//                            .duration(brush.empty() ? 0 : 750)
-//                            .call(brush.extent(defaultExtent))
-//                            .call(brush.event);
-                }
-
-                function search(quadtree, x0, y0, x3, y3) {
-                    quadtree.visit(function(node, x1, y1, x2, y2) {
-                        var p = node.point;
-                        if (p){
-                            p.selected = (p.budget >= x0) && (p.budget < x3) && (p.affAbility >= y0) && (p.affAbility < y3);
-                        }
-                        return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
-                    });
-                }
 
                 svg.append("g")
                         .attr("class", "x axis")
@@ -177,11 +139,73 @@
                         .classed('x', true)
                         .classed('grid', true)
                         .call(xAxisGrid);
+
+                var point = svg.selectAll(".point")
+                        .data(this.rawdata)
+                        .enter().append("circle")
+                        .attr("class", "point")
+                        .attr("id", function(d){
+                            return "b" + d.id;
+                        })
+                        .style("fill", function(d) { return d.color; })
+                        .attr("cx", function(d) { return x(d.budget); })
+                        .attr("cy", function(d) { return y(d.affAbility); })
+                        .attr("r", 4);
+
+                svg.append("g")
+                        .attr("class", "brush")
+                        .call(brush)
+                        .call(brush.event);
+
+                function brushed() {
+                    var extent = brush.extent();
+                    var selected = {};
+                    if (extent[0][0] - extent[1][0] == 0 || extent[0][1] - extent[1][1] == 0){
+                        point.classed("grayed", function (d) {
+                            selected["b" + d.id] = true;
+                            return false;
+                        });
+                    }else {
+                        point.each(function (d) {
+                            d.selected = false;
+                        });
+                        search(quadtree, extent[0][0], extent[0][1], extent[1][0], extent[1][1]);
+                        point.classed("grayed", function (d) {
+                            selected["b" + d.id] = d.selected ? true : false;
+                            return !d.selected;
+                        });
+                    }
+
+                    this.asyncFire('core-signal', {name: "select-group", data: selected});
+
+                }
+
+                function brushended() {
+                    if (!d3.event.sourceEvent) return; // only transition after input
+//                    d3.select(this).transition()
+//                            .duration(brush.empty() ? 0 : 750)
+//                            .call(brush.extent(defaultExtent))
+//                            .call(brush.event);
+                }
+
+                function search(quadtree, x0, y0, x3, y3) {
+                    quadtree.visit(function(node, x1, y1, x2, y2) {
+                        var p = node.point;
+                        if (p){
+                            p.selected = (p.budget >= x0) && (p.budget < x3) && (p.affAbility >= y0) && (p.affAbility < y3);
+                        }
+                        return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+                    });
+                }
+
             },
             rawdataChanged: function(o, n){
                 if (n && n.length > 0){
-                    this.redraw();
+                    if (this.visible === "") this.redraw();
                 }
+            },
+            visibleChanged: function(o, n){
+                if (n === "" && this.rawdata && this.rawdata.length > 0) this.redraw();
             }
         });
     </script>
