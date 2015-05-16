@@ -229,6 +229,9 @@
                                 return "translate(" + (x(0) - 60) +"," + ( i*rh) + ")";
                             });
 
+                    var onmouseover = this.mouseover.bind(this);
+                    var onmouseout = this.mouseout.bind(this);
+
                     g.append('rect')
                             .attr("width", 60)
                             .attr("height", rh)
@@ -236,13 +239,8 @@
                             .style("stroke-width", "1px")
                             .style("stroke", "white")
                             .attr("id", "b" + data.id)
-                            .on("mouseenter", onmouseover)
-                            .on("mouseleave", onmouseout);
-//                    g.append('text')
-//                            .attr("x", 20)
-//                            .attr("y", 30)
-//                            .attr("dy", ".35em")
-//                            .text("haha");
+                            .on("mouseenter", function(d){onmouseover(this.id);})
+                            .on("mouseleave", function(d){onmouseout(this.id);});
 
                 }
 
@@ -274,27 +272,7 @@
 
 
 
-                function onmouseover(d){
-                    if (this.id == "b0") return;
-                    var svg = d3.select(this.ownerSVGElement);
-                    svg.selectAll("path#" + this.id)
-                            .style("opacity", 1)
-                            .style("stroke-width", "3px");
-                    svg.selectAll("path#" + this.id + "area")
-                            .classed("vis", true);
 
-                }
-
-                function onmouseout(d){
-                    if (this.id == "b0") return;
-                    var svg = d3.select(this.ownerSVGElement);
-                    svg.selectAll("path#" + this.id)
-                            .style("opacity", 0.3)
-                            .style("stroke-width", "1px");
-                    svg.selectAll("path#" + this.id + "area")
-                            .classed("vis", false);
-
-                }
 
                 function clasterize(d, i, a ){
                     if ( i == 0 ) return true;
@@ -313,6 +291,27 @@
                     }
                     return path.join("");
                 }
+
+            },
+            mouseover:function(id){
+                if (id == "b"+this.selOne) return;
+                if (id == "b0") return;
+                this.svg.selectAll("path#" + id)
+                        .style("opacity", 1)
+                        .style("stroke-width", "3px");
+                this.svg.selectAll("path#" + id + "area")
+                        .classed("vis", true);
+
+            },
+
+            mouseout:function(id){
+                if (id == "b"+this.selOne) return;
+                if (id == "b0") return;
+                this.svg.selectAll("path#" + id)
+                        .style("opacity", 0.3)
+                        .style("stroke-width", "1px");
+                this.svg.selectAll("path#" + id + "area")
+                        .classed("vis", false);
 
             },
             processData: function(){
@@ -462,7 +461,12 @@
                 this.svg.selectAll("rect").classed("grayed", function(d){
                     return !e.detail[this.id];
                 });
-            }
+            },
+            selectOne: function(e){
+                this.svg.selectAll("path#b" + e.detail.id + "area").classed("vis", false);
+                this.selOne = e.detail.id;
+                this.svg.selectAll("path#b" + e.detail.id + "area").classed("vis", true)
+            },
 
         });
     </script>
