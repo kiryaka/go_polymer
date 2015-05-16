@@ -28,29 +28,55 @@
                 border-right: none;
             }
 
+            .selected{
+                background-color: #eee;
+            }
+
+            .total>div{
+                border: none !important;
+                margin: 10px 10px;
+            }
+            .total span{
+                font-weight: 500;
+            }
+
         </style>
-        <div layout vertical class="container">
+        <div layout vertical class="container" id="list">
             <div layout horizontal class="headers">
                 <div flex ten>Name</div>
                 <div flex one>Abil</div>
                 <div flex one>Diff</div>
                 <div flex one>Cost</div>
             </div>
-            <template repeat="{{variant in variants}}">
-                <div layout horizontal>
+            <template repeat="{{variant, i in variants}}">
+                <div layout horizontal id="o{{i}}">
                     <div flex ten>{{variant.text}}</div>
                     <div flex one>{{variant.affAbility}}</div>
                     <div flex one>{{variant.probDiff}}</div>
                     <div flex one>{{variant.cost}}</div>
                 </div>
             </template>
+            <div layout horizontal class="total">
+                <div flex></div>
+                <div><span>Total cost:</span> {{detail.budget}}</div>
+                <div><span>Affect Ability:</span> {{detail.affAbility | round}}</div>
+                <div><span>Average Impact:</span> {{detail.average + detail.zeroAverage | round}}</div>
+                <div><span>Impact Diff:</span> {{detail.average| round}}</div>
+            </div>
         </div>
-
+        <core-signals on-core-signal-select-one="{{selectOne}}"></core-signals>
     </template>
     <script>
         Polymer({
             ready: function(){
 
+            },
+            selectOne: function(e){
+                if (!this.variants) return;
+                this.detail = e.detail;
+            },
+            round: function(d){
+                return d3.round(d, 2);
             }
         });
     </script>

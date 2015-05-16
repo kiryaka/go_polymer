@@ -91,7 +91,7 @@
 
         </style>
         <svg id="chart"></svg>
-        <core-signals on-core-signal-select-group="{{selectGroup}}"></core-signals>
+        <core-signals on-core-signal-select-group="{{selectGroup}}" on-core-signal-select-one="{{selectOne}}"rawdata></core-signals>
     </template>
 
     <script>
@@ -374,8 +374,9 @@
 
                     var data = [];
                     var budget = 0;
-                    var affAbility = 0;
+                    var affAbility = 10;
                     var average = 0;
+                    var affMax = d3.max(this.variants, function(d){return d.affAbility});
 
                     var changed = "|";
                     for (var scenario = 0; scenario < this.scenNumber; scenario++) {
@@ -414,10 +415,15 @@
 
                     processed.add(changed);
 
+                    var affNum = 0;
                     for (var factor = 0; factor < this.variants.length; factor++) {
                         var ep = (bud & (1 << factor ) ) > 0 ? 1 : 0
                         if (ep == 1) budget -= -(this.variants[factor].cost || 0);
-                        if (ep == 1) affAbility -= -(this.variants[factor].affAbility || 0);
+                        if (ep == 1){
+                            var ex = d3.extent([affAbility, this.variants[factor].affAbility])
+                            affAbility = ex[0]/2 + ((ex[0]/2)*ex[1])/10;
+                            affNum++;
+                        }
                     }
 
                     if (bud == 0){
@@ -428,7 +434,7 @@
                     }
 
 
-                    arr.push({data: data, budget: budget, affAbility:affAbility, id: bud, average: average});
+                    arr.push({data: data, budget: budget, affAbility:affAbility, id: bud, average: average, zeroAverage: zeroAverage});
                 }
 
                 var scale = d3.scale.linear().domain(d3.extent(arr, function(d){return d.average})).range([0,10]);

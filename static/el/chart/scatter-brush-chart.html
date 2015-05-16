@@ -52,9 +52,15 @@
             }
 
 
-        </style>
+            .point.selectedOne{
+                stroke: blue !important;
+                stroke-width: 2px;
+            }
 
+
+        </style>
         <svg id="chart" class="nouserselect"></svg>
+        <core-signals on-core-signal-select-group="{{selectGroup}}" on-core-signal-select-one="{{selectOne}}"></core-signals>
     </template>
 
     <script>
@@ -64,7 +70,7 @@
             },
             redraw: function(){
                 d3.select(this.$.chart).selectAll("*").remove();
-                var margin = {top: 10, right: 10, bottom: 20, left: 20},
+                var margin = {top: 10, right: 10, bottom: 20, left: 30},
                         width = this.parentElement.getBoundingClientRect().width - margin.left - margin.right,
                         height = this.parentElement.getBoundingClientRect().height/4 - margin.top - margin.bottom;
 
@@ -73,8 +79,11 @@
                         .domain([0, d3.max(this.rawdata, function(d) { return d.budget; })]).nice()
                         .range([0, width]);
 
-                var y = d3.scale.linear()
-                        .domain([0, d3.max(this.rawdata, function(d) { return d.affAbility + d.affAbility/20; })]).nice()
+                var ymin = d3.min(this.rawdata, function(d) { return d.affAbility; });
+                ymin = ymin - ymin/3;
+
+                var y = d3.scale.pow().exponent(.3)
+                        .domain([ymin, d3.max(this.rawdata, function(d) { return d.affAbility; })])
                         .range([height, 0]);
 
                 var data = this.rawdata.map(function(d) { return [d.budget, d.affAbility]; });
@@ -107,9 +116,11 @@
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+                this.svg = svg;
+
                 svg.append("g")
                         .attr("class", "x axis")
-                        .attr("transform", "translate(0," + y(0) + ")")
+                        .attr("transform", "translate(0," + y(ymin) + ")")
 //                        .attr("transform", "translate(0," + height + ")")
                         .call(xAxis);
 
@@ -206,6 +217,12 @@
             },
             visibleChanged: function(o, n){
                 if (n === "" && this.rawdata && this.rawdata.length > 0) this.redraw();
+            },
+            selectOne: function(e){
+                if (!this.svg) return;
+                this.svg.selectAll("circle").classed("selectedOne", function(d){
+                    return e.detail.id == d.id;
+                });
             }
         });
     </script>

@@ -24,10 +24,15 @@
                 fill-opacity: 1;
             }
 
+            .selectedOne{
+                stroke: blue !important;
+                stroke-width: 2px;
+            }
+
 
         </style>
-        <svg id="chart"></svg>
-        <core-signals on-core-signal-select-group="{{selectGroup}}"></core-signals>
+        <svg id="chart" class="nouserselect"></svg>
+        <core-signals on-core-signal-select-group="{{selectGroup}}" on-core-signal-select-one="{{selectOne}}"></core-signals>
     </template>
     <script>
         Polymer({
@@ -78,8 +83,7 @@
                         .attr("class", "y axis")
                         .call(yAxis);
 
-                var fireFn = this.asyncFire.bind(this)
-
+                var _this = this;
                 svg.selectAll(".bar")
                         .data(this.rawdata)
                         .enter().append("rect")
@@ -93,9 +97,13 @@
                         .attr("height", function(d) { return height - y(d.average); })
                         .style("fill", function(d) {return d.color;})
                         .on('click', function(e) {
-//                            fireFn('core-signal', {name: "showsc", data: d3.event.currentTarget.__data__.endpoints});
+                            if (this.classList.contains("selectedOne")){
+                                _this.asyncFire('core-signal', {name: "select-one", data:_this.rawdata[_this.rawdata.length - 1]});
+                            }else{
+                                _this.asyncFire('core-signal', {name: "select-one", data: e});
+                            }
                         });
-
+                this.asyncFire('core-signal', {name: "select-one", data:_this.rawdata[_this.rawdata.length - 1]})
                 this.svg = svg;
 
             },
@@ -112,6 +120,12 @@
                 if (!this.svg) return;
                 this.svg.selectAll(".bar").classed("grayed", function(d){
                     return !e.detail[this.id];
+                });
+            },
+            selectOne: function(e){
+                if (!this.svg) return;
+                this.svg.selectAll(".bar").classed("selectedOne", function(d){
+                    return "b" + e.detail.id == this.id;
                 });
             }
         });

@@ -18,7 +18,7 @@
     "new": false,
     "cost": "38",
     "probDiff": "0.1",
-    "affAbility": "1"
+    "affAbility": "9"
   },
   {
     "uid": 2,
@@ -39,7 +39,7 @@
     "new": false,
     "cost": "45",
     "probDiff": "0.1",
-    "affAbility": "6"
+    "affAbility": "7"
   },
   {
     "uid": 3,
@@ -48,19 +48,19 @@
       {
         "text": "Nationals' perception of equivalent social status in public-private sector jobs",
         "prob": "0.65",
-        "impact": 3
+        "impact": "13"
       },
       {
         "text": "Nationals' perception of low social status in private sector jobs",
-        "prob": "0.35",
-        "impact": "-4"
+        "prob": 0.35,
+        "impact": "-24"
       }
     ],
     "visible": true,
     "new": false,
-    "cost": "30",
-    "probDiff": "0.2",
-    "affAbility": "9"
+    "cost": "50",
+    "probDiff": "0.25",
+    "affAbility": "2"
   },
   {
     "uid": 4,
@@ -81,7 +81,7 @@
     "new": false,
     "cost": "145",
     "probDiff": "0.4",
-    "affAbility": "23"
+    "affAbility": "8"
   },
   {
     "uid": 5,
@@ -110,19 +110,19 @@
     "endpoints": [
       {
         "text": "Job seeking population continues to expand",
-        "prob": "0.85",
+        "prob": "0.35",
         "impact": 3
       },
       {
         "text": "Job seeking population stablizes or contracts",
-        "prob": "0.15",
-        "impact": "-4"
+        "prob": 0.65,
+        "impact": "-24"
       }
     ],
     "visible": true,
     "new": false,
-    "cost": "16",
-    "probDiff": "0.05",
+    "cost": "36",
+    "probDiff": "0.6",
     "affAbility": "4"
   }
 ]
