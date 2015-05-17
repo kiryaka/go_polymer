@@ -87,6 +87,10 @@
                 /*stroke: #ccc !important;*/
                 visibility: hidden !important;
             }
+            .blue {
+                /*stroke: #ccc !important;*/
+                fill: blue !important;
+            }
 
 
         </style>
@@ -463,10 +467,21 @@
                 });
             },
             selectOne: function(e){
-                this.svg.selectAll("path#b" + e.detail.id + "area").classed("vis", false);
+                this.svg.selectAll("path#b" + this.selOne + "area").classed("vis", false);
+                this.svg.selectAll("rect#b" + this.selOne).attr("width", "60");
+                this.svg.selectAll("path#b" + this.selOne)
+                        .style("opacity", 0.3)
+                        .style("stroke-width", "1px");
+
+
                 this.selOne = e.detail.id;
-                this.svg.selectAll("path#b" + e.detail.id + "area").classed("vis", true)
-            },
+                this.svg.selectAll("path#b" + this.selOne + "area").classed("vis", true)
+                this.svg.selectAll("rect#b" + this.selOne).attr("width", "75");
+                this.svg.selectAll("path#b" + this.selOne)
+                        .style("opacity", 1)
+                        .style("stroke-width", "3px");
+
+            }
 
         });
     </script>
